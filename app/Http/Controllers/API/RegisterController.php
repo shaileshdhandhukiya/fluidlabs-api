@@ -42,7 +42,7 @@ class RegisterController extends BaseController
 
         $user->sendEmailVerificationNotification();
 
-        $success["token"] = $user->createToken("MyApp")->accessToken;
+        $success["token"] = $user->createToken("Fluidlabs CRM")->accessToken;
 
         $success["name"] = $user->name;
 

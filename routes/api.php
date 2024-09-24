@@ -28,8 +28,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
 
-
-
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
     return response()->json(['message' => 'Email verified successfully']);
@@ -43,3 +41,10 @@ Route::post('/email/resend', function (Request $request) {
 Route::get('/password/reset/{token}', function ($token) {
     return response()->json(['token' => $token]);
 })->name('password.reset');
+
+
+Route::fallback(function (Request $request) {
+    return response()->json([
+        'message' => 'Endpoint not found. If error persists, contact support.'
+    ], 404);
+});
