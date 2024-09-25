@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\PasswordResetController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\API\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,9 @@ Route::post('login', [RegisterController::class, 'login'])->name('login');
 
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
+    Route::resource('products', ProductController::class);
+    // Route::apiResource('products', ProductController::class);
+    
     // Protected routes
     Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');    
 
@@ -44,22 +48,20 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::put('roles/{id}', [API\RoleController::class, 'update']);                // Update a role
     Route::delete('roles/{id}', [API\RoleController::class, 'destroy']);            // Delete a role
 
+    Route::post('/email/resend', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return response()->json(['message' => 'Verification email resent']);
+    });
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return response()->json(['message' => 'Email verified successfully']);
+    })->middleware(['auth:api', 'signed'])->name('verification.verify');
+
+    Route::get('/password/reset/{token}', function ($token) {  
+        return response()->json(['token' => $token]);
+    })->name('password.reset');
+    
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');    
 });
-
-
-Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
-
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
-    return response()->json(['message' => 'Email verified successfully']);
-})->middleware(['auth:api', 'signed'])->name('verification.verify');
-
-Route::post('/email/resend', function (Request $request) {
-    $request->user()->sendEmailVerificationNotification();
-    return response()->json(['message' => 'Verification email resent']);
-})->middleware('auth:api');
-
-Route::get('/password/reset/{token}', function ($token) {  
-    return response()->json(['token' => $token]);
-})->name('password.reset');
 

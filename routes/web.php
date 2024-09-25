@@ -18,8 +18,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::fallback(function (Request $request) {
-    return response()->json([
-        'message' => 'You Are going in Space'
-    ], 404);
-});
+// Route::fallback(function (Request $request) {
+//     return response()->json([
+//         'message' => 'You Are going in Space'
+//     ], 404);
+// });
