@@ -38,13 +38,7 @@ Route::post('/email/resend', function (Request $request) {
     return response()->json(['message' => 'Verification email resent']);
 })->middleware('auth:api');
 
-Route::get('/password/reset/{token}', function ($token) {
+Route::get('/password/reset/{token}', function ($token) {  
     return response()->json(['token' => $token]);
 })->name('password.reset');
 
-
-Route::fallback(function (Request $request) {
-    return response()->json([
-        'message' => 'Endpoint not found. If error persists, contact support.'
-    ], 404);
-});
