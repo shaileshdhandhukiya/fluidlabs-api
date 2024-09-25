@@ -20,6 +20,6 @@ Route::get('/', function () {
 
 Route::fallback(function (Request $request) {
     return response()->json([
-        'message' => 'You Are going in Backhole'
+        'message' => 'You Are going in Space'
     ], 404);
 });
