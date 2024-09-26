@@ -40,7 +40,7 @@
 
                 <h1 class="mt-6 text-8xl font-semibold text-gray-900 dark:text-white" style="
     font-size: 45px;
-">Fludilabs UK CRM</h1>
+">Fluidlabs UK CRM</h1>
                
             </div>
         </div>

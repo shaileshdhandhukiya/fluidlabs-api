@@ -21,7 +21,7 @@ class PermissionTableSeeder extends Seeder
             'project-list',
             'project-create',
             'project-edit',
-            'project-delete'
+            'project-delete',
         ];
         
         foreach ($permissions as $permission) {

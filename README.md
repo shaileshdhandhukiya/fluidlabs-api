@@ -7,6 +7,8 @@ Fluidlabs CRM Backend Using Laravel 10
 1 Install Dependancy 
 <pre>composer install </pre>
 
+<pre>php artisan key:generate </pre>
+
 2 Install Migrations
 <pre>php artisan migrate </pre>
 

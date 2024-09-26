@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ProductResource;
 use Illuminate\Http\JsonResponse;
+
      
 class ProductController extends BaseController
 {

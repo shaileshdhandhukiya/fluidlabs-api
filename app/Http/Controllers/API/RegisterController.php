@@ -60,7 +60,7 @@ class RegisterController extends BaseController
 
             $success["token"] = $user->createToken("Fluidlabs CRM")->accessToken;
 
-            $success["name"] = $user->name;
+            $success["first_name"] = $user->first_name;
 
             return $this->sendResponse($success, "User login successfully.");
             
