@@ -7,6 +7,7 @@ use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\PasswordResetController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,10 +23,10 @@ use App\Http\Controllers\API\ProductController;
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 Route::post('login', [RegisterController::class, 'login'])->name('login');
 
+
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::resource('products', ProductController::class);
-
     // Protected routes
     Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');    
 
@@ -42,7 +43,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::delete('users/{id}', [API\UserController::class, 'destroy']);            // Delete a user
 
     Route::get('roles', [API\RoleController::class, 'index']);                      // List all roles
-    // Route::get('roles', [API\RoleController::class, 'index'])->middleware('permission:role-list');
     Route::post('roles', [API\RoleController::class, 'store']);                     // Create a new role
     Route::get('roles/{id}', [API\RoleController::class, 'show']);                  // Show a specific role
     Route::put('roles/{id}', [API\RoleController::class, 'update']);                // Update a role

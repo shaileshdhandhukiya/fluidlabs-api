@@ -13,17 +13,21 @@ class RoleController extends BaseController
 {
     public function __construct()
     {
-        $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index', 'store']]);
-        $this->middleware('permission:role-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:role-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:role-delete', ['only' => ['destroy']]);
+
+        $this->middleware('auth:api'); // Ensure the user is authenticated
+        
+        $user = auth()->user();
+        // \Log::info('User Permissions: ', $user->getAllPermissions()->toArray());
+        // $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:role-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:role-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:role-delete', ['only' => ['destroy']]);
     }
 
     public function index(Request $request): JsonResponse
     {
-      
-        $roles = Role::orderBy('id', 'DESC')->paginate(5);
 
+        $roles = Role::orderBy('id', 'DESC')->paginate(5);
         return response()->json([
             'success' => true,
             'data' => [
@@ -36,7 +40,7 @@ class RoleController extends BaseController
     {
 
         dd("hello");
-        
+
         $request->validate([
             'name' => 'required|unique:roles,name',
             'permission' => 'required',
