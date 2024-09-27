@@ -15,7 +15,7 @@ class SubscriptionController extends Controller
     {
         try {
             $subscriptions = Subscription::all();
-            return response()->json($subscriptions, 200); // 200 OK
+            return response()->json(['success' => true, 'data' => $subscriptions], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to retrieve subscriptions'], 500); // 500 Internal Server Error
         }
@@ -39,7 +39,8 @@ class SubscriptionController extends Controller
 
         try {
             $subscription = Subscription::create($request->all());
-            return response()->json($subscription, 201); // 201 Created
+            return response()->json(['success' => true, 'data' => $subscription], 201);
+            
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to create subscription'], 500); // 500 Internal Server Error
         }

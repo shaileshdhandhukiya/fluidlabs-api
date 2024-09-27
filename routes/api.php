@@ -30,7 +30,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::resource('products', ProductController::class);
     // Protected routes
-    Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');    
+    Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
 
     Route::get('projects', [API\ProjectController::class, 'index']);                // List all projects
     Route::post('projects', [API\ProjectController::class, 'store']);               // Create a new project
@@ -54,7 +54,14 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::post('/subscriptions', [API\SubscriptionController::class, 'store']);
     Route::get('/subscriptions/{id}', [API\SubscriptionController::class, 'show']);
     Route::put('/subscriptions/{id}', [API\SubscriptionController::class, 'update']);
-    Route::delete('/subscriptions/{id}', [API\SubscriptionController::class, 'destroy']);    
+    Route::delete('/subscriptions/{id}', [API\SubscriptionController::class, 'destroy']);
+
+    Route::get('/customers', [API\CustomerController::class, 'index']);         // Get all customers
+    Route::post('/customers', [API\CustomerController::class, 'store']);        // Create new customer
+    Route::get('/customers/{id}', [API\CustomerController::class, 'show']);     // Get a specific customer
+    Route::put('/customers/{id}', [API\CustomerController::class, 'update']);   // Update a specific customer
+    Route::delete('/customers/{id}', [API\CustomerController::class, 'destroy']); // Delete a specific customer
+
 
     Route::post('/email/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
@@ -66,10 +73,10 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
         return response()->json(['message' => 'Email verified successfully']);
     })->middleware(['auth:api', 'signed'])->name('verification.verify');
 
-    Route::get('/password/reset/{token}', function ($token) {  
+    Route::get('/password/reset/{token}', function ($token) {
         return response()->json(['token' => $token]);
     })->name('password.reset');
-    
-    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');    
+
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
 });
 
