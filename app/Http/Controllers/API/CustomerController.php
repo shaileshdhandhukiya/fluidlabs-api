@@ -75,7 +75,7 @@ class CustomerController extends BaseController
     public function update(Request $request, $id): JsonResponse
     {
         $customer = Customer::find($id);
-        
+
         if (!$customer) {
             return response()->json([
                 'success' => false,
@@ -83,19 +83,20 @@ class CustomerController extends BaseController
             ], 404);
         }
 
+        // Define validation rules
         $validator = Validator::make($request->all(), [
-            'company' => 'string|max:255',
-            'phone' => 'string|max:50',
-            'currency' => 'string|max:10',
-            'email' => 'string|email|max:255|unique:customers,email,' . $customer->id,
-            'website' => 'nullable|string|max:255',
-            'office_address' => 'string',
-            'city' => 'string|max:100',
-            'state' => 'string|max:100',
-            'country' => 'string|max:100',
-            'zip_code' => 'string|max:20',
+            'company' => 'required|string|max:255',
+            'phone' => 'required|string|max:50',
+            'currency' => 'required|string|max:10',
+            'email' => 'required|string|email|max:255|unique:customers,email,' . $customer->id,
+            'website' => 'required|string|max:255',
+            'office_address' => 'required|string',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'country' => 'required|string|max:100',
+            'zip_code' => 'required|string|max:20',
             'description' => 'nullable|string',
-            'subscription_package' => 'string',
+            'subscription_package' => 'required|string',
             'status' => 'boolean',
         ]);
 
@@ -106,7 +107,23 @@ class CustomerController extends BaseController
             ], 422);
         }
 
-        $customer->update($request->all());
+        // Update the customer record with valid data
+        $customer->update($request->only([
+            'company',
+            'phone',
+            'currency',
+            'email',
+            'website',
+            'office_address',
+            'city',
+            'state',
+            'country',
+            'zip_code',
+            'description',
+            'subscription_package',
+            'status'
+        ]));
+
         return response()->json([
             'success' => true,
             'data' => $customer,
