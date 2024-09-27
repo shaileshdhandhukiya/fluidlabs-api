@@ -135,7 +135,8 @@ class CustomerController extends BaseController
             'success' => true,
             'data' => $customer,
             'message' => 'Customer updated successfully.',
-        ]);
+            'status' => 200,
+        ],200);
     }
 
     // Delete a customer by ID
@@ -146,13 +147,16 @@ class CustomerController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => 'Customer not found.',
+                'status' => 404,
             ], 404);
         }
 
         $customer->delete();
+        
         return response()->json([
             'success' => true,
             'message' => 'Customer deleted successfully.',
-        ]);
+            'status' => 200,
+        ],200);
     }
 }
