@@ -14,17 +14,17 @@ class SubscriptionController extends Controller
     public function index()
     {
         try {
-            $subscriptions = Subscription::all();
+            $subscriptions = Subscription::latest()->paginate(10);
             return response()->json(['success' => true, 'data' => $subscriptions], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to retrieve subscriptions'], 500); // 500 Internal Server Error
         }
+
     }
 
     // Create a new subscription
     public function store(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
             'description' => 'nullable',

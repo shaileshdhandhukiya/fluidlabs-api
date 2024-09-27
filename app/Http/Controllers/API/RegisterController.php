@@ -53,21 +53,28 @@ class RegisterController extends BaseController
     public function login(Request $request): JsonResponse
     {
         if (Auth::attempt([
-                "email" => $request->email,
-                "password" => $request->password,
-            ])) {
+            "email" => $request->email,
+            "password" => $request->password,
+        ])) {
             $user = Auth::user();
 
             $success["token"] = $user->createToken("Fluidlabs CRM")->accessToken;
-
             $success["first_name"] = $user->first_name;
+            $success["last_name"] = $user->last_name;
+            $success["email"] = $user->email;
+            $success["role"] = $user->role;
 
-            return $this->sendResponse($success, "User login successfully.");
-            
+            return response()->json([
+                'success' => true,
+                'data' => $success,
+                'message' => 'User login successfully.'
+            ], 200); // HTTP 200 OK
         } else {
-            return $this->sendError("Unauthorised.", [
-                "error" => "Unauthorised",
-            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorised',
+                'error' => 'Unauthorised'
+            ], 401); // HTTP 401 Unauthorized
         }
     }
 }

@@ -22,12 +22,12 @@ class UserController extends BaseController
      */
     public function index(Request $request): JsonResponse
     {
-        $users = User::latest()->paginate(5);
+        $users = User::latest()->paginate(10);
 
         return response()->json([
             'success' => true,
             'data' => $users,
-        ]);
+        ], 200); // HTTP 200 OK
     }
 
     /**
@@ -48,12 +48,16 @@ class UserController extends BaseController
             'role' => 'required|string',
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
-            'email' => 'required|email|unique:users,email', 
-            'password' => 'required',  
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError("Validation Error.", $validator->errors());
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error.',
+                'errors' => $validator->errors()
+            ], 422); // HTTP 422 Unprocessable Entity
         }
 
         $input = $request->all();
@@ -61,9 +65,9 @@ class UserController extends BaseController
         // Handle file upload
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
-            $filename = time() . '.' . $file->getClientOriginalExtension(); 
+            $filename = time() . '.' . $file->getClientOriginalExtension();
             $file->storeAs('uploads/profile_photos', $filename, 'public');
-            $input['profile_photo'] = 'uploads/profile_photos/' . $filename; 
+            $input['profile_photo'] = 'uploads/profile_photos/' . $filename;
         }
 
         $input['password'] = bcrypt($input['password']);
@@ -77,7 +81,6 @@ class UserController extends BaseController
             'data' => $user,
         ], 201);
     }
-
 
     /**
      * Display the specified user.
@@ -99,7 +102,7 @@ class UserController extends BaseController
         return response()->json([
             'success' => true,
             'data' => $user,
-        ]);
+        ], 200); // HTTP 200 OK
     }
 
     /**
@@ -114,7 +117,7 @@ class UserController extends BaseController
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'nullable|string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
@@ -122,12 +125,16 @@ class UserController extends BaseController
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:6',  
+            'password' => 'nullable|string|min:6',
             'roles' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError("Validation Error.", $validator->errors());
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error.',
+                'errors' => $validator->errors()
+            ], 422); // HTTP 422 Unprocessable Entity
         }
 
         $user = User::find($id);
@@ -136,7 +143,7 @@ class UserController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => 'User not found.'
-            ], 404);
+            ], 404); // HTTP 404 Not Found
         }
 
         // Handle file upload for profile photo
@@ -151,7 +158,6 @@ class UserController extends BaseController
             $user->profile_photo = $path;
         }
 
-        // Update the user information
         $input = $request->all();
 
         // Handle password hashing if password is provided
@@ -161,12 +167,10 @@ class UserController extends BaseController
             $input = Arr::except($input, ['password']);
         }
 
-        // Update user data
         $user->update($input);
 
-        // Update roles
         DB::table('model_has_roles')->where('model_id', $id)->delete();
-        
+
         if ($request->input('roles')) {
             $user->assignRole($request->input('roles'));
         }
@@ -175,7 +179,7 @@ class UserController extends BaseController
             'success' => true,
             'message' => 'User updated successfully.',
             'data' => $user,
-        ]);
+        ], 200); // HTTP 200 OK
     }
 
 
@@ -193,7 +197,7 @@ class UserController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => 'User not found.'
-            ], 404);
+            ], 404); // HTTP 404 Not Found
         }
 
         $user->delete();
@@ -201,6 +205,6 @@ class UserController extends BaseController
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully.'
-        ]);
+        ], 200); // HTTP 200 OK
     }
 }

@@ -13,11 +13,6 @@ class RoleController extends BaseController
 {
     public function __construct()
     {
-
-        $this->middleware('auth:api'); // Ensure the user is authenticated
-        
-        $user = auth()->user();
-        // \Log::info('User Permissions: ', $user->getAllPermissions()->toArray());
         // $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index', 'store']]);
         // $this->middleware('permission:role-create', ['only' => ['create', 'store']]);
         // $this->middleware('permission:role-edit', ['only' => ['edit', 'update']]);
@@ -28,12 +23,11 @@ class RoleController extends BaseController
     {
 
         $roles = Role::orderBy('id', 'DESC')->paginate(5);
+
         return response()->json([
             'success' => true,
-            'data' => [
-                'roles' => $roles,
-            ],
-        ]);
+            'data' => ['roles' => $roles],
+        ], 200); // HTTP 200 OK
     }
 
     public function store(Request $request): JsonResponse
@@ -50,7 +44,7 @@ class RoleController extends BaseController
             'success' => true,
             'message' => 'Role created successfully.',
             'data' => $role,
-        ], 201);
+        ], 201); // HTTP 201 Created
     }
 
     public function show($id): JsonResponse
@@ -66,8 +60,8 @@ class RoleController extends BaseController
 
         return response()->json([
             'success' => true,
-            'data' => ['role' => $role, 'permissions' => $rolePermissions]
-        ]);
+            'data' => ['role' => $role, 'permissions' => $rolePermissions],
+        ], 200); // HTTP 200 OK
     }
 
     public function update(Request $request, $id): JsonResponse
@@ -87,7 +81,7 @@ class RoleController extends BaseController
             'success' => true,
             'message' => 'Role updated successfully.',
             'data' => $role,
-        ]);
+        ], 200); // HTTP 200 OK
     }
 
     public function destroy($id): JsonResponse
@@ -102,6 +96,6 @@ class RoleController extends BaseController
         return response()->json([
             'success' => true,
             'message' => 'Role deleted successfully.',
-        ]);
+        ], 200); // HTTP 200 OK
     }
 }
