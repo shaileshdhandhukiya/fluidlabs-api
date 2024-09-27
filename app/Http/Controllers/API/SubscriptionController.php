@@ -89,6 +89,7 @@ class SubscriptionController extends Controller
         return response()->json([
             'message' => 'Subscription updated successfully',
             'subscription' => $subscription,
+            'status' => 200,
         ], 200);
     }
 

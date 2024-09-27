@@ -27,6 +27,7 @@ class UserController extends BaseController
         return response()->json([
             'success' => true,
             'data' => $users,
+            'status' => 200,
         ], 200); // HTTP 200 OK
     }
 
@@ -56,7 +57,8 @@ class UserController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => 'Validation Error.',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
+                'status' => 422,
             ], 422); // HTTP 422 Unprocessable Entity
         }
 
@@ -79,6 +81,7 @@ class UserController extends BaseController
             'success' => true,
             'message' => 'User created successfully.',
             'data' => $user,
+            'status' => 201,
         ], 201);
     }
 
@@ -95,13 +98,15 @@ class UserController extends BaseController
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found.'
+                'message' => 'User not found.',
+                'status' => 404,
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'data' => $user,
+            'status' => 200,
         ], 200); // HTTP 200 OK
     }
 
@@ -133,7 +138,8 @@ class UserController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => 'Validation Error.',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
+                'status' => 422,
             ], 422); // HTTP 422 Unprocessable Entity
         }
 
@@ -142,7 +148,8 @@ class UserController extends BaseController
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found.'
+                'message' => 'User not found.',
+                'status' => 404,
             ], 404); // HTTP 404 Not Found
         }
 
@@ -179,6 +186,7 @@ class UserController extends BaseController
             'success' => true,
             'message' => 'User updated successfully.',
             'data' => $user,
+            'status' => 200,
         ], 200); // HTTP 200 OK
     }
 
@@ -196,7 +204,8 @@ class UserController extends BaseController
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found.'
+                'message' => 'User not found.',
+                'status' => 404,
             ], 404); // HTTP 404 Not Found
         }
 
@@ -204,7 +213,8 @@ class UserController extends BaseController
 
         return response()->json([
             'success' => true,
-            'message' => 'User deleted successfully.'
+            'message' => 'User deleted successfully.',
+            'status' => 200,
         ], 200); // HTTP 200 OK
     }
 }

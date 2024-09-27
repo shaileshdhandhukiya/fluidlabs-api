@@ -27,7 +27,11 @@ class RegisterController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError("Validation Error.", $validator->errors());
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error.',
+                'errors' => $validator->errors(),
+            ], 422); // HTTP 422 Unprocessable Entity
         }
 
         $input = $request->all();
@@ -38,11 +42,14 @@ class RegisterController extends BaseController
 
         $user->sendEmailVerificationNotification();
 
-        $success["token"] = $user->createToken("Fluidlabs CRM")->accessToken;
-
-        $success["name"] = $user->name;
-
-        return $this->sendResponse($success, "User register successfully.");
+        $success["token"] = $user->createToken("auth_token")->accessToken;
+        $success["email"] = $user->email;
+        
+        return response()->json([
+            'success' => true,
+            'data' => $success,
+            'message' => 'User registered successfully. Please verify your email.',
+        ], 201); // HTTP 201 Created
     }
 
     /**
@@ -58,7 +65,7 @@ class RegisterController extends BaseController
         ])) {
             $user = Auth::user();
 
-            $success["token"] = $user->createToken("Fluidlabs CRM")->accessToken;
+            $success["token"] = $user->createToken("auth_token")->accessToken;
             $success["first_name"] = $user->first_name;
             $success["last_name"] = $user->last_name;
             $success["email"] = $user->email;
@@ -69,6 +76,7 @@ class RegisterController extends BaseController
                 'data' => $success,
                 'message' => 'User login successfully.'
             ], 200); // HTTP 200 OK
+
         } else {
             return response()->json([
                 'success' => false,
