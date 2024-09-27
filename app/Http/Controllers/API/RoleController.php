@@ -38,9 +38,6 @@ class RoleController extends BaseController
 
     public function store(Request $request): JsonResponse
     {
-
-        dd("hello");
-
         $request->validate([
             'name' => 'required|unique:roles,name',
             'permission' => 'required',

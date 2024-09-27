@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->enum('billing_duration', ['monthly', 'quarterly', 'yearly']);
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->decimal('price', 10, 2);
             $table->timestamps();
         });
     }

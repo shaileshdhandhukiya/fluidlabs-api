@@ -38,19 +38,18 @@ class UserController extends BaseController
      */
     public function store(Request $request): JsonResponse
     {
-        // Validate request data
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'nullable|string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',  // Validate as image
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
             'role' => 'required|string',
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
-            'email' => 'required|email|unique:users,email',  // Required, must be a valid email and unique
-            'password' => 'required',  // Required, must match the confirmation password (password_confirmation field in request)
+            'email' => 'required|email|unique:users,email', 
+            'password' => 'required',  
         ]);
 
         if ($validator->fails()) {
@@ -62,15 +61,15 @@ class UserController extends BaseController
         // Handle file upload
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
-            $filename = time() . '.' . $file->getClientOriginalExtension(); // Create a unique file name
-            $file->storeAs('uploads/profile_photos', $filename, 'public'); // Store the file in public/uploads/profile_photos
-            $input['profile_photo'] = 'uploads/profile_photos/' . $filename; // Set the file path to input
+            $filename = time() . '.' . $file->getClientOriginalExtension(); 
+            $file->storeAs('uploads/profile_photos', $filename, 'public');
+            $input['profile_photo'] = 'uploads/profile_photos/' . $filename; 
         }
 
-        $input['password'] = bcrypt($input['password']); // Hash the password
+        $input['password'] = bcrypt($input['password']);
 
-        $user = User::create($input); // Create user
-        $user->assignRole($request->input('roles')); // Assign role to user
+        $user = User::create($input);
+        $user->assignRole($request->input('roles'));
 
         return response()->json([
             'success' => true,
@@ -115,7 +114,7 @@ class UserController extends BaseController
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'nullable|string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',  // Validate the profile photo
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
@@ -123,8 +122,8 @@ class UserController extends BaseController
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:6',  // Make password optional
-            'roles' => 'nullable|string',  // Adjust roles validation if needed
+            'password' => 'nullable|string|min:6',  
+            'roles' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -149,7 +148,7 @@ class UserController extends BaseController
 
             // Store the new profile photo
             $path = $request->file('profile_photo')->store('profile_photos', 'public');
-            $user->profile_photo = $path; // Save the path to the user's profile_photo field
+            $user->profile_photo = $path;
         }
 
         // Update the user information
@@ -159,7 +158,7 @@ class UserController extends BaseController
         if (!empty($input['password'])) {
             $input['password'] = bcrypt($input['password']);
         } else {
-            $input = Arr::except($input, ['password']); // Remove password if it's not provided
+            $input = Arr::except($input, ['password']);
         }
 
         // Update user data
@@ -167,6 +166,7 @@ class UserController extends BaseController
 
         // Update roles
         DB::table('model_has_roles')->where('model_id', $id)->delete();
+        
         if ($request->input('roles')) {
             $user->assignRole($request->input('roles'));
         }

@@ -7,7 +7,9 @@ use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\PasswordResetController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\API\ProductController;
-use App\Http\Controllers\API\RoleController;
+// use App\Http\Controllers\API\RoleController;
+// use App\Http\Controllers\Api\SubscriptionController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +49,12 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('roles/{id}', [API\RoleController::class, 'show']);                  // Show a specific role
     Route::put('roles/{id}', [API\RoleController::class, 'update']);                // Update a role
     Route::delete('roles/{id}', [API\RoleController::class, 'destroy']);            // Delete a role
+
+    Route::get('/subscriptions', [API\SubscriptionController::class, 'index']);
+    Route::post('/subscriptions', [API\SubscriptionController::class, 'store']);
+    Route::get('/subscriptions/{id}', [API\SubscriptionController::class, 'show']);
+    Route::put('/subscriptions/{id}', [API\SubscriptionController::class, 'update']);
+    Route::delete('/subscriptions/{id}', [API\SubscriptionController::class, 'destroy']);    
 
     Route::post('/email/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
