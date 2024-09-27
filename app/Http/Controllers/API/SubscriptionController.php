@@ -7,17 +7,23 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-
 class SubscriptionController extends Controller
 {
-    // Get all subscriptions
+
     public function index()
     {
         try {
             $subscriptions = Subscription::latest()->paginate(10);
-            return response()->json(['success' => true, 'data' => $subscriptions], 200);
+            return response()->json([
+                'success' => true, 
+                'data' => $subscriptions,
+                'status' => 200,
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve subscriptions'], 500); // 500 Internal Server Error
+            return response()->json([
+                'error' => 'Failed to retrieve subscriptions',
+                'status' => 500,
+            ], 500); // 500 Internal Server Error
         }
 
     }
@@ -34,15 +40,18 @@ class SubscriptionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400); // 400 Bad Request
+            return response()->json([
+                'errors' => $validator->errors(),
+                'status' => 400,
+            ], 400); // 400 Bad Request
         }
 
         try {
             $subscription = Subscription::create($request->all());
-            return response()->json(['success' => true, 'data' => $subscription], 201);
+            return response()->json(['success' => true, 'data' => $subscription, 'status' => 201], 201);
             
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create subscription'], 500); // 500 Internal Server Error
+            return response()->json(['error' => 'Failed to create subscription','status' => 500], 500); // 500 Internal Server Error
         }
     }
 
@@ -53,12 +62,17 @@ class SubscriptionController extends Controller
             $subscription = Subscription::find($id);
 
             if (!$subscription) {
-                return response()->json(['error' => 'Subscription not found'], 404); // 404 Not Found
+                return response()->json(['error' => 'Subscription not found','status' => 404], 404); // 404 Not Found
             }
 
-            return response()->json($subscription, 200); // 200 OK
+            return response()->json([
+                'success' => true,
+                'data' => $subscription,
+                'status' => 200,
+            ], 200); // HTTP 200 OK
+
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve subscription'], 500); // 500 Internal Server Error
+            return response()->json(['error' => 'Failed to retrieve subscription','status' => 500], 500); // 500 Internal Server Error
         }
     }
 
@@ -75,13 +89,13 @@ class SubscriptionController extends Controller
 
         // If validation fails, return a 422 Unprocessable Entity response with error details
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors(),'status' => 422], 422);
         }
 
         $subscription = Subscription::find($id);
 
         if (!$subscription) {
-            return response()->json(['error' => 'Subscription not found'], 404);
+            return response()->json(['error' => 'Subscription not found','status' => 404], 404);
         }
 
         $subscription->update($request->all());
@@ -100,13 +114,27 @@ class SubscriptionController extends Controller
             $subscription = Subscription::find($id);
 
             if (!$subscription) {
-                return response()->json(['error' => 'Subscription not found'], 404); // 404 Not Found
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Subscription not found',
+                    'status' => 404,
+                ], 404); // HTTP 404 Not Found
             }
 
             $subscription->delete();
-            return response()->json(['message' => 'Subscription deleted successfully'], 200); // 200 OK
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription deleted successfully',
+                'status' => 200,
+            ], 200); // HTTP 200 OK
+
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to delete subscription'], 500); // 500 Internal Server Error
+
+            return response()->json([
+                'error' => 'Failed to delete subscription',
+                'status' => 500,
+            ], 500); // 500 Internal Server Error        
         }
     }
 }

@@ -27,6 +27,7 @@ class RoleController extends BaseController
         return response()->json([
             'success' => true,
             'data' => ['roles' => $roles],
+            'status' => 200,
         ], 200); // HTTP 200 OK
     }
 
@@ -44,6 +45,7 @@ class RoleController extends BaseController
             'success' => true,
             'message' => 'Role created successfully.',
             'data' => $role,
+            'status' => 201,
         ], 201); // HTTP 201 Created
     }
 
@@ -61,6 +63,7 @@ class RoleController extends BaseController
         return response()->json([
             'success' => true,
             'data' => ['role' => $role, 'permissions' => $rolePermissions],
+            'status' => 200
         ], 200); // HTTP 200 OK
     }
 
@@ -70,7 +73,7 @@ class RoleController extends BaseController
 
         $role = Role::find($id);
         if (!$role) {
-            return response()->json(['success' => false, 'message' => 'Role not found.'], 404);
+            return response()->json(['success' => false, 'message' => 'Role not found.', 'status' => 404], 404);
         }
 
         $role->name = $request->input('name');
@@ -81,6 +84,7 @@ class RoleController extends BaseController
             'success' => true,
             'message' => 'Role updated successfully.',
             'data' => $role,
+            'status' => 200,
         ], 200); // HTTP 200 OK
     }
 
@@ -88,7 +92,11 @@ class RoleController extends BaseController
     {
         $role = Role::find($id);
         if (!$role) {
-            return response()->json(['success' => false, 'message' => 'Role not found.'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Role not found.',
+                'status' => 500
+            ], 404);
         }
 
         DB::table("roles")->where('id', $id)->delete();
@@ -96,6 +104,7 @@ class RoleController extends BaseController
         return response()->json([
             'success' => true,
             'message' => 'Role deleted successfully.',
+            'status' => 200
         ], 200); // HTTP 200 OK
     }
 }

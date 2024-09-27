@@ -17,7 +17,8 @@ class CustomerController extends BaseController
         return response()->json([
             'success' => true,
             'data' => $customers,
-        ]);
+            'status' => 200
+        ],200);
     }
 
     // Create a new customer
@@ -43,6 +44,7 @@ class CustomerController extends BaseController
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
+                'status' => 422
             ], 422);
         }
 
@@ -51,6 +53,7 @@ class CustomerController extends BaseController
             'success' => true,
             'data' => $customer,
             'message' => 'Customer created successfully.',
+            'status' => 201,
         ], 201);
     }
 
@@ -62,13 +65,15 @@ class CustomerController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => 'Customer not found.',
+                'status' => 404,
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'data' => $customer,
-        ]);
+            'status' => 200
+        ],200);
     }
 
     // Update a customer by ID
@@ -80,6 +85,7 @@ class CustomerController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => 'Customer not found.',
+                'status' => 404,
             ], 404);
         }
 
@@ -89,7 +95,7 @@ class CustomerController extends BaseController
             'phone' => 'required|string|max:50',
             'currency' => 'required|string|max:10',
             'email' => 'required|string|email|max:255|unique:customers,email,' . $customer->id,
-            'website' => 'required|string|max:255',
+            'website' => 'nullable|string|max:255',
             'office_address' => 'required|string',
             'city' => 'required|string|max:100',
             'state' => 'required|string|max:100',
@@ -104,6 +110,7 @@ class CustomerController extends BaseController
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
+                'status' => 422,
             ], 422);
         }
 

@@ -31,6 +31,7 @@ class RegisterController extends BaseController
                 'success' => false,
                 'message' => 'Validation Error.',
                 'errors' => $validator->errors(),
+                'status' => 422
             ], 422); // HTTP 422 Unprocessable Entity
         }
 
@@ -49,6 +50,7 @@ class RegisterController extends BaseController
             'success' => true,
             'data' => $success,
             'message' => 'User registered successfully. Please verify your email.',
+            'status' => 201
         ], 201); // HTTP 201 Created
     }
 
@@ -74,14 +76,16 @@ class RegisterController extends BaseController
             return response()->json([
                 'success' => true,
                 'data' => $success,
-                'message' => 'User login successfully.'
+                'message' => 'User login successfully.',
+                'status' => 200
             ], 200); // HTTP 200 OK
 
         } else {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorised',
-                'error' => 'Unauthorised'
+                'error' => 'Unauthorised',
+                'status' => 401
             ], 401); // HTTP 401 Unauthorized
         }
     }
