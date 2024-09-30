@@ -7,8 +7,6 @@ use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\PasswordResetController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\API\ProductController;
-// use App\Http\Controllers\API\RoleController;
-// use App\Http\Controllers\Api\SubscriptionController;
 
 
 /*
@@ -30,7 +28,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::resource('products', ProductController::class);
     // Protected routes
-   
 
     Route::get('projects', [API\ProjectController::class, 'index']);               
     Route::post('projects', [API\ProjectController::class, 'store']);               
@@ -62,6 +59,18 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::put('/customers/{id}', [API\CustomerController::class, 'update']);   
     Route::delete('/customers/{id}', [API\CustomerController::class, 'destroy']); 
 
+    Route::get('projects', [API\ProjectController::class, 'index']);               
+    Route::post('projects', [API\ProjectController::class, 'store']);               
+    Route::get('projects/{id}', [API\ProjectController::class, 'show']);       
+    Route::put('projects/{id}', [API\ProjectController::class, 'update']);     
+    Route::delete('projects/{id}', [API\ProjectController::class, 'destroy']);
+
+    Route::get('tasks', [API\TaskController::class, 'index']);                
+    Route::post('tasks', [API\TaskController::class, 'store']);               
+    Route::get('tasks/{id}', [API\TaskController::class, 'show']);          
+    Route::put('tasks/{id}', [API\TaskController::class, 'update']);        
+    Route::delete('tasks/{id}', [API\TaskController::class, 'destroy']);
+
     Route::post('/email/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
         return response()->json(['message' => 'Verification email resent']);
@@ -77,7 +86,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     })->name('password.reset');
 
     Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
-
     Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
+
 });
 

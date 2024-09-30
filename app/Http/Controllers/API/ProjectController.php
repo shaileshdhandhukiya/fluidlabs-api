@@ -3,78 +3,173 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
-use App\Models\Project;
 use Illuminate\Http\Request;
+use App\Models\Project;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\JsonResponse;
 
 class ProjectController extends BaseController
 {
-    public function __construct()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
-        $this->middleware('permission:project-list|project-create|project-edit|project-delete', ['only' => ['index', 'show']]);
-        $this->middleware('permission:project-create', ['only' => ['store']]);
-        $this->middleware('permission:project-edit', ['only' => ['update']]);
-        $this->middleware('permission:project-delete', ['only' => ['destroy']]);
-    }
+        $projects = Project::with('customer', 'tasks')->get();
 
-    public function index(): JsonResponse
-    {
-        $projects = Project::latest()->paginate(5);
-        
         return response()->json([
             'success' => true,
             'data' => $projects,
-        ]);
+            'message' => 'Projects retrieved successfully',
+            'status' => 200,
+        ], 200); // HTTP 200 OK
     }
 
-    public function store(Request $request): JsonResponse
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'detail' => 'required',
-        ]);
+        if (is_string($request->members)) {
+            $request->merge([
+                'members' => explode(',', $request->members)
+            ]);
+        }
 
-        $project = Project::create($request->all());
+        $validator = Validator::make($request->all(), [
+            'project_name' => 'required|string',
+            'customer_id' => 'required|exists:customers,id',
+            'status' => 'required|in:not started,in progress,on hold,cancelled,finished',
+            'progress' => 'nullable|integer',
+            'members' => 'required|array',
+            'estimated_hours' => 'nullable|integer',
+            'start_date' => 'required|date',
+            'deadline' => 'nullable|date',
+            'description' => 'nullable|string',
+            'send_project_created_email' => 'nullable|boolean',
+        ]);
+       
+        // $data = $request->all();
+        // dd(gettype($data['members']));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+                'status' => 400,
+            ], 400); // HTTP 400 Bad Request
+        }
+
+        // dd($request->all());
+
+        $project = Project::create($validator->validated());
 
         return response()->json([
             'success' => true,
-            'message' => 'Project created successfully.',
             'data' => $project,
-        ], 201);
+            'message' => 'Project created successfully',
+            'status' => 201,
+        ], 201); // HTTP 201 Created
+
     }
 
-    public function show(Project $project): JsonResponse
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
     {
+        $project = Project::with('customer', 'tasks')->find($id);
+
+        if (!$project) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Project not found',
+                'status' => 404,
+            ], 404); // HTTP 404 Not Found
+        }
+
         return response()->json([
             'success' => true,
             'data' => $project,
-        ]);
+            'message' => 'Project retrieved successfully',
+            'status' => 200,
+        ], 200); // HTTP 200 OK
     }
 
-    public function update(Request $request, Project $project): JsonResponse
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required',
-            'detail' => 'required',
+        $project = Project::find($id);
+
+        if (!$project) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Project not found',
+                'status' => 404,
+            ], 404); // HTTP 404 Not Found
+        }
+       
+        if (is_string($request->members)) {
+            $request->merge([
+                'members' => explode(',', $request->members)
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'project_name' => 'required|string',
+            'customer_id' => 'required|exists:customers,id',
+            'status' => 'required|in:not started,in progress,on hold,cancelled,finished',
+            'progress' => 'nullable|integer',
+            'members' => 'required|array',
+            'estimated_hours' => 'nullable|integer',
+            'start_date' => 'required|date',
+            'deadline' => 'nullable|date',
+            'description' => 'nullable|string',
+            'send_project_created_email' => 'nullable|boolean',
         ]);
 
-        $project->update($request->all());
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+                'status' => 400,
+            ], 400); // HTTP 400 Bad Request
+        }
+
+        $project->update($validator->validated());
 
         return response()->json([
             'success' => true,
-            'message' => 'Project updated successfully.',
             'data' => $project,
-        ]);
+            'message' => 'Project updated successfully',
+            'status' => 200,
+        ], 200); // HTTP 200 OK
     }
 
-    public function destroy(Project $project): JsonResponse
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
     {
+        $project = Project::find($id);
+
+        if (!$project) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Project not found',
+                'status' => 404,
+            ], 404); // HTTP 404 Not Found
+        }
+
         $project->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Project deleted successfully.',
-        ]);
+            'message' => 'Project deleted successfully',
+            'status' => 200,
+        ], 200); // HTTP 200 OK
     }
 }
