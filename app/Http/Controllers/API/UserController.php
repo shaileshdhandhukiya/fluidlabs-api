@@ -7,7 +7,7 @@ use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Hash;
 use Illuminate\Support\Arr;
 use Illuminate\Http\JsonResponse;

@@ -31,6 +31,7 @@ class SubscriptionController extends Controller
     // Create a new subscription
     public function store(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
             'description' => 'nullable',

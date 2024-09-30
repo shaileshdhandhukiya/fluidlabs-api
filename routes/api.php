@@ -30,25 +30,25 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::resource('products', ProductController::class);
     // Protected routes
-    Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
+   
 
-    Route::get('projects', [API\ProjectController::class, 'index']);                // List all projects
-    Route::post('projects', [API\ProjectController::class, 'store']);               // Create a new project
-    Route::get('projects/{project}', [API\ProjectController::class, 'show']);       // Show a specific project
-    Route::put('projects/{project}', [API\ProjectController::class, 'update']);     // Update an existing project
-    Route::delete('projects/{project}', [API\ProjectController::class, 'destroy']); // Delete a project
+    Route::get('projects', [API\ProjectController::class, 'index']);               
+    Route::post('projects', [API\ProjectController::class, 'store']);               
+    Route::get('projects/{project}', [API\ProjectController::class, 'show']);       
+    Route::put('projects/{project}', [API\ProjectController::class, 'update']);     
+    Route::delete('projects/{project}', [API\ProjectController::class, 'destroy']); 
 
-    Route::get('users', [API\UserController::class, 'index']);                      // List all users
-    Route::post('users', [API\UserController::class, 'store']);                     // Create a new user
-    Route::get('users/{id}', [API\UserController::class, 'show']);                  // Show a specific user
-    Route::put('users/{id}', [API\UserController::class, 'update']);                // Update a user
-    Route::delete('users/{id}', [API\UserController::class, 'destroy']);            // Delete a user
+    Route::get('users', [API\UserController::class, 'index']);                      
+    Route::post('users', [API\UserController::class, 'store']);                     
+    Route::get('users/{id}', [API\UserController::class, 'show']);                  
+    Route::put('users/{id}', [API\UserController::class, 'update']);                
+    Route::delete('users/{id}', [API\UserController::class, 'destroy']);            
 
-    Route::get('roles', [API\RoleController::class, 'index']);                      // List all roles
-    Route::post('roles', [API\RoleController::class, 'store']);                     // Create a new role
-    Route::get('roles/{id}', [API\RoleController::class, 'show']);                  // Show a specific role
-    Route::put('roles/{id}', [API\RoleController::class, 'update']);                // Update a role
-    Route::delete('roles/{id}', [API\RoleController::class, 'destroy']);            // Delete a role
+    Route::get('roles', [API\RoleController::class, 'index']);                      
+    Route::post('roles', [API\RoleController::class, 'store']);                     
+    Route::get('roles/{id}', [API\RoleController::class, 'show']);                  
+    Route::put('roles/{id}', [API\RoleController::class, 'update']);                
+    Route::delete('roles/{id}', [API\RoleController::class, 'destroy']);            
 
     Route::get('/subscriptions', [API\SubscriptionController::class, 'index']);
     Route::post('/subscriptions', [API\SubscriptionController::class, 'store']);
@@ -56,12 +56,11 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::put('/subscriptions/{id}', [API\SubscriptionController::class, 'update']);
     Route::delete('/subscriptions/{id}', [API\SubscriptionController::class, 'destroy']);
 
-    Route::get('/customers', [API\CustomerController::class, 'index']);         // Get all customers
-    Route::post('/customers', [API\CustomerController::class, 'store']);        // Create new customer
-    Route::get('/customers/{id}', [API\CustomerController::class, 'show']);     // Get a specific customer
-    Route::put('/customers/{id}', [API\CustomerController::class, 'update']);   // Update a specific customer
-    Route::delete('/customers/{id}', [API\CustomerController::class, 'destroy']); // Delete a specific customer
-
+    Route::get('/customers', [API\CustomerController::class, 'index']);        
+    Route::post('/customers', [API\CustomerController::class, 'store']);        
+    Route::get('/customers/{id}', [API\CustomerController::class, 'show']);     
+    Route::put('/customers/{id}', [API\CustomerController::class, 'update']);   
+    Route::delete('/customers/{id}', [API\CustomerController::class, 'destroy']); 
 
     Route::post('/email/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
@@ -76,6 +75,8 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('/password/reset/{token}', function ($token) {
         return response()->json(['token' => $token]);
     })->name('password.reset');
+
+    Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
 
     Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
 });
