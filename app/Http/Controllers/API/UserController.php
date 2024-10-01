@@ -8,7 +8,7 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Hash;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Arr;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +53,8 @@ class UserController extends BaseController
             'password' => 'required',
         ]);
 
+
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -72,7 +74,9 @@ class UserController extends BaseController
             $input['profile_photo'] = 'uploads/profile_photos/' . $filename;
         }
 
-        $input['password'] = bcrypt($input['password']);
+        $input['original_password'] = $input['password'];
+        
+        $input['password'] = Hash::make($input['password']);
 
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
@@ -167,9 +171,13 @@ class UserController extends BaseController
 
         $input = $request->all();
 
-        // Handle password hashing if password is provided
         if (!empty($input['password'])) {
-            $input['password'] = bcrypt($input['password']);
+            // $input['password'] = bcrypt($input['password']);
+
+            $input['password'] = Hash::make($input['password']);
+
+            $input['original_password'] = $input['password'];
+
         } else {
             $input = Arr::except($input, ['password']);
         }
