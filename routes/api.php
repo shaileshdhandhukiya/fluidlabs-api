@@ -45,7 +45,8 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::post('roles', [API\RoleController::class, 'store']);                     
     Route::get('roles/{id}', [API\RoleController::class, 'show']);                  
     Route::put('roles/{id}', [API\RoleController::class, 'update']);                
-    Route::delete('roles/{id}', [API\RoleController::class, 'destroy']);            
+    Route::delete('roles/{id}', [API\RoleController::class, 'destroy']);
+    Route::get('permissions', [API\RoleController::class, 'create']);               
 
     Route::get('/subscriptions', [API\SubscriptionController::class, 'index']);
     Route::post('/subscriptions', [API\SubscriptionController::class, 'store']);

@@ -13,41 +13,40 @@ class RoleController extends BaseController
 {
     public function __construct()
     {
-      
-
         $this->middleware('auth:api');
         $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index', 'store']]);
         $this->middleware('permission:role-create', ['only' => ['create', 'store']]);
         $this->middleware('permission:role-edit', ['only' => ['edit', 'update']]);
         $this->middleware('permission:role-delete', ['only' => ['destroy']]);
-
-        // $this->middleware(function ($request, $next) {
-        //     $user = auth()->user();
-        //     if (!$user) {
-        //         return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
-        //     }
-    
-        //     // Check user permissions
-        //     if (!$user->hasPermissionTo('role-list')) {
-        //         return response()->json(['success' => false, 'message' => 'User does not have permission for role-list.'], 403);
-        //     }
-    
-        //     return $next($request);
-        // });
-
     }
 
     public function index(Request $request): JsonResponse
     {
-
         $roles = Role::orderBy('id', 'DESC')->paginate(5);
 
         return response()->json([
             'success' => true,
-            'data' => ['roles' => $roles],
+            'data' => [
+                'roles' => $roles
+            ],
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
+
+    public function create(): JsonResponse
+    {
+        $permission = Permission::get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'permission'=>$permission
+            ],
+            'status' => 200,
+        ], 200); // HTTP 200 OK
+    }
+
 
     public function store(Request $request): JsonResponse
     {

@@ -50,10 +50,8 @@ class UserController extends BaseController
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required',
+            'password' => 'required|min:12',
         ]);
-
-
 
         if ($validator->fails()) {
             return response()->json([
@@ -134,7 +132,7 @@ class UserController extends BaseController
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:6',
+            'password' => 'required|string|min:12',
             'roles' => 'nullable|string',
         ]);
 
