@@ -29,6 +29,13 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+
+        if (is_string($request->assignees)) {
+            $request->merge([
+                'assignees' => explode(',', $request->assignees)
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
             'subject' => 'required|string',
             'start_date' => 'required|date',
