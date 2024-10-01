@@ -28,7 +28,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::resource('products', ProductController::class);
     // Protected routes
-
+    
     Route::get('projects', [API\ProjectController::class, 'index']);               
     Route::post('projects', [API\ProjectController::class, 'store']);               
     Route::get('projects/{project}', [API\ProjectController::class, 'show']);       

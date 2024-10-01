@@ -14,7 +14,14 @@ class TaskController extends Controller
      */
     public function index()
     {
-        return Task::with('project')->get();
+        $tasks = Task::with('project')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $tasks,
+            'message' => 'Tasks retrieved successfully',
+            'status' => 200,
+        ], 200); // HTTP 200 OK
     }
 
     /**
@@ -22,7 +29,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'subject' => 'required|string',
             'start_date' => 'required|date',
             'due_date' => 'nullable|date',
@@ -34,8 +41,22 @@ class TaskController extends Controller
             'attach_file' => 'nullable|string',
         ]);
 
-        $task = Task::create($data);
-        return response()->json($task, 201);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+                'status' => 400,
+            ], 400); // HTTP 400 Bad Request
+        }
+
+        $task = Task::create($validator->validated());
+        return response()->json([
+            'success' => true,
+            'data' => $task,
+            'message' => 'Task created successfully',
+            'status' => 201,
+        ], 201); // HTTP 201 Created
     }
 
     /**

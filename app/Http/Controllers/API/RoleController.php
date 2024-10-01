@@ -13,10 +13,28 @@ class RoleController extends BaseController
 {
     public function __construct()
     {
-        // $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index', 'store']]);
-        // $this->middleware('permission:role-create', ['only' => ['create', 'store']]);
-        // $this->middleware('permission:role-edit', ['only' => ['edit', 'update']]);
-        // $this->middleware('permission:role-delete', ['only' => ['destroy']]);
+      
+
+        $this->middleware('auth:api');
+        $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index', 'store']]);
+        $this->middleware('permission:role-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:role-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:role-delete', ['only' => ['destroy']]);
+
+        // $this->middleware(function ($request, $next) {
+        //     $user = auth()->user();
+        //     if (!$user) {
+        //         return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
+        //     }
+    
+        //     // Check user permissions
+        //     if (!$user->hasPermissionTo('role-list')) {
+        //         return response()->json(['success' => false, 'message' => 'User does not have permission for role-list.'], 403);
+        //     }
+    
+        //     return $next($request);
+        // });
+
     }
 
     public function index(Request $request): JsonResponse
