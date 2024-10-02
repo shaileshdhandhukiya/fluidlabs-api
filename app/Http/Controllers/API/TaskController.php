@@ -39,7 +39,7 @@ class TaskController extends Controller
         $validator = Validator::make($request->all(), [
             'subject' => 'required|string',
             'start_date' => 'required|date',
-            'due_date' => 'nullable|date',
+            'due_date' => 'required|date',
             'priority' => 'required|in:low,medium,high,urgent',
             'project_id' => 'required|exists:projects,id',
             'assignees' => 'required|array',
@@ -107,7 +107,7 @@ class TaskController extends Controller
         $validator = Validator::make($request->all(), [
             'subject' => 'required|string',
             'start_date' => 'required|date',
-            'due_date' => 'nullable|date',
+            'due_date' => 'required|date',
             'priority' => 'required|in:low,medium,high,urgent',
             'project_id' => 'required|exists:projects,id',
             'assignees' => 'required|array',
