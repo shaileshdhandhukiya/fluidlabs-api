@@ -27,7 +27,9 @@ Route::post('login', [RegisterController::class, 'login'])->name('login');
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::resource('products', ProductController::class);
-    // Protected routes
+
+    // dashboard Analytics
+    Route::get('dashboard/analytics', [API\DashboardController::class, 'index']);
     
     Route::get('projects', [API\ProjectController::class, 'index']);               
     Route::post('projects', [API\ProjectController::class, 'store']);               
