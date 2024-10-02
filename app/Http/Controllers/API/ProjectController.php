@@ -172,4 +172,44 @@ class ProjectController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
+     /**
+     * Get all projects and linked tasks for a specific user.
+     */
+    public function getUserProjectsWithTasks($user_id)
+    {
+        try {
+            // Fetch projects where the user is a member (assuming 'members' field contains user IDs in an array)
+            $projects = Project::whereJsonContains('members', $user_id)
+                ->with('tasks') // Assuming a Project has a 'tasks' relationship
+                ->get();
+
+            if ($projects->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No projects found for the given user',
+                    'status' => 404,
+                ], 404); // HTTP 404 Not Found
+            }
+
+            // Return the projects along with their tasks
+            return response()->json([
+                'success' => true,
+                'data' => $projects,
+                'message' => 'Projects and linked tasks retrieved successfully',
+                'status' => 200,
+            ], 200); // HTTP 200 OK
+
+        } catch (Exception $e) {
+            // Log the error for debugging
+            Log::error('Error retrieving projects and tasks: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve projects and tasks',
+                'error' => $e->getMessage(),
+                'status' => 500,
+            ], 500); // HTTP 500 Internal Server Error
+        }
+    }
 }
