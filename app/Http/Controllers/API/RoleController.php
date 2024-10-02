@@ -33,7 +33,6 @@ class RoleController extends BaseController
         ], 200); // HTTP 200 OK
     }
 
-
     public function create(): JsonResponse
     {
         $permission = Permission::get();
@@ -46,7 +45,6 @@ class RoleController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
-
 
     public function store(Request $request): JsonResponse
     {

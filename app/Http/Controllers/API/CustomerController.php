@@ -62,6 +62,7 @@ class CustomerController extends BaseController
     public function show($id): JsonResponse
     {
         $customer = Customer::find($id);
+
         if (!$customer) {
             return response()->json([
                 'success' => false,
@@ -146,6 +147,7 @@ class CustomerController extends BaseController
     public function destroy($id): JsonResponse
     {
         $customer = Customer::find($id);
+        
         if (!$customer) {
             return response()->json([
                 'success' => false,

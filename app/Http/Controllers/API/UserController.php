@@ -56,9 +56,6 @@ class UserController extends BaseController
             'password' => 'required|min:12',
         ]);
 
-
-        // dd($request->all());
-
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,

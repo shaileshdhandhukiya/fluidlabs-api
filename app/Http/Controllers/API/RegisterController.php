@@ -65,9 +65,8 @@ class RegisterController extends BaseController
             "email" => $request->email,
             "password" => $request->password,
         ])) {
-            $user = Auth::user();
 
-            // dd( $user);
+            $user = Auth::user();
 
             $success["token"] = $user->createToken("auth_token")->accessToken;
             $success["first_name"] = $user->first_name;
@@ -75,7 +74,6 @@ class RegisterController extends BaseController
             $success["email"] = $user->email;
             $success["role"] = $user->role;
             $success["user_id"] = $user->id;
-
 
             return response()->json([
                 'success' => true,
