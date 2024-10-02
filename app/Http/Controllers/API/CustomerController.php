@@ -26,6 +26,7 @@ class CustomerController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'company' => 'required|string|max:255',
+            'customer_name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
             'currency' => 'required|string|max:10',
             'email' => 'required|string|email|max:255|unique:customers',
@@ -92,6 +93,7 @@ class CustomerController extends BaseController
         // Define validation rules
         $validator = Validator::make($request->all(), [
             'company' => 'required|string|max:255',
+            'customer_name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
             'currency' => 'required|string|max:10',
             'email' => 'required|string|email|max:255|unique:customers,email,' . $customer->id,
@@ -117,6 +119,7 @@ class CustomerController extends BaseController
         // Update the customer record with valid data
         $customer->update($request->only([
             'company',
+            'customer_name',
             'phone',
             'currency',
             'email',
