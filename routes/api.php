@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\PasswordResetController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Controllers\API\ProductController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -25,8 +23,6 @@ Route::post('login', [RegisterController::class, 'login'])->name('login');
 
 
 Route::middleware(['auth:api', 'verified'])->group(function () {
-
-    Route::resource('products', ProductController::class);
 
     // dashboard Analytics
     Route::get('dashboard/analytics', [API\DashboardController::class, 'index']);
