@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -39,10 +40,12 @@ class UserController extends BaseController
      */
     public function store(Request $request): JsonResponse
     {
+
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
-            'last_name' => 'nullable|string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'last_name' => 'required|string',
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif',
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
@@ -52,6 +55,9 @@ class UserController extends BaseController
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:12',
         ]);
+
+
+        // dd($request->all());
 
         if ($validator->fails()) {
             return response()->json([
@@ -73,7 +79,7 @@ class UserController extends BaseController
         }
 
         $input['original_password'] = $input['password'];
-        
+
         $input['password'] = Hash::make($input['password']);
 
         $user = User::create($input);
@@ -105,11 +111,16 @@ class UserController extends BaseController
             ], 404);
         }
 
+        // Generate the full URL for the profile photo
+        $user->profile_photo_url = $user->profile_photo
+            ? URL::to('/storage/' . $user->profile_photo)
+            : null; // Or a default image URL if no profile photo is set
+
         return response()->json([
             'success' => true,
             'data' => $user,
             'status' => 200,
-        ], 200); // HTTP 200 OK
+        ], 200);
     }
 
     /**
@@ -123,8 +134,8 @@ class UserController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
-            'last_name' => 'nullable|string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'last_name' => 'required|string',
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
@@ -170,12 +181,8 @@ class UserController extends BaseController
         $input = $request->all();
 
         if (!empty($input['password'])) {
-            // $input['password'] = bcrypt($input['password']);
-
             $input['password'] = Hash::make($input['password']);
-
             $input['original_password'] = $input['password'];
-
         } else {
             $input = Arr::except($input, ['password']);
         }
