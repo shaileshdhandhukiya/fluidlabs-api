@@ -168,7 +168,7 @@ class ProjectController extends BaseController
         ], 200); // HTTP 200 OK
     }
 
-    /**
+     /**
      * Get all projects and linked tasks for a specific user.
      */
     public function getUserProjectsWithTasks($user_id)
