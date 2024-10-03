@@ -22,7 +22,7 @@ class RoleController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
-        $roles = Role::orderBy('id', 'DESC')->paginate(5);
+        $roles = Role::orderBy('id', 'DESC')->paginate(10);
 
         return response()->json([
             'success' => true,
