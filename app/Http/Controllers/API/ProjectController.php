@@ -175,12 +175,15 @@ class ProjectController extends BaseController
      */
     public function getUserProjectsWithTasks($user_id)
     {
+
         try {
             // Fetch projects where the user is a member (assuming 'members' field contains user IDs in an array)
             $projects = Project::whereJsonContains('members', $user_id)
                 ->with('tasks') // Assuming a Project has a 'tasks' relationship
                 ->get();
 
+
+            
             if ($projects->isEmpty()) {
                 return response()->json([
                     'success' => false,
