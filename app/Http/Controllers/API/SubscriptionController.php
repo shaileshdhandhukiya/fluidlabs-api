@@ -38,6 +38,7 @@ class SubscriptionController extends Controller
             'billing_duration' => 'required',
             'status' => 'required',
             'price' => 'required',
+            'currency' => 'required'
         ]);
 
         if ($validator->fails()) {
