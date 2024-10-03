@@ -7,6 +7,8 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Project;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends BaseController
 {
@@ -143,7 +145,9 @@ class CustomerController extends BaseController
         ],200);
     }
 
-    // Delete a customer by ID
+    /* 
+    * Delete a customer by ID
+     */
     public function destroy($id): JsonResponse
     {
         $customer = Customer::find($id);
@@ -163,5 +167,45 @@ class CustomerController extends BaseController
             'message' => 'Customer deleted successfully.',
             'status' => 200,
         ],200);
+    }
+
+    /**
+     * Get all projects and their associated tasks based on the customer_id.
+     */
+    public function getProjectsWithTasksByCustomer($customer_id)
+    {
+        try {
+            
+            $projects = Project::where('customer_id', $customer_id)
+                ->with('tasks')
+                ->get();
+
+            if ($projects->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No projects found for this customer',
+                    'status' => 404,
+                ], 404); // HTTP 404 Not Found
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $projects,
+                'message' => 'Projects and associated tasks retrieved successfully',
+                'status' => 200,
+            ], 200); // HTTP 200 OK
+
+
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Error fetching projects and tasks for customer: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve projects and tasks',
+                'error' => $e->getMessage(),
+                'status' => 500,
+            ], 500); // HTTP 500 Internal Server Error
+        }
     }
 }

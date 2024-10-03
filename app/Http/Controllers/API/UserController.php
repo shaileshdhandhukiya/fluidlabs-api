@@ -23,7 +23,9 @@ class UserController extends BaseController
      */
     public function index(Request $request): JsonResponse
     {
-        $users = User::latest()->paginate(10);
+        // $users = User::latest()->paginate(10);
+
+        $users = User::where('id', '!=', 1)->latest()->paginate(10);
 
         return response()->json([
             'success' => true,
@@ -40,7 +42,6 @@ class UserController extends BaseController
      */
     public function store(Request $request): JsonResponse
     {
-
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
