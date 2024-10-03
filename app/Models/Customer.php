@@ -12,6 +12,6 @@ class Customer extends Model
     protected $fillable = [
         'company', 'phone', 'currency', 'email', 'website', 
         'office_address', 'city', 'state', 'country', 'zip_code', 
-        'description', 'subscription_package', 'status','customer_name'
+        'description', 'subscription_package', 'status','customer_name','billing_type'
     ];
 }

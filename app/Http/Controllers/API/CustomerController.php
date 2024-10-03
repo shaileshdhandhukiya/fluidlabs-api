@@ -40,6 +40,7 @@ class CustomerController extends BaseController
             'zip_code' => 'required|string|max:20',
             'description' => 'nullable|string',
             'subscription_package' => 'required|string',
+            'billing_type' => 'required|in:monthly,quarterly,yearly',
             'status' => 'boolean',
         ]);
 
@@ -108,6 +109,7 @@ class CustomerController extends BaseController
             'zip_code' => 'required|string|max:20',
             'description' => 'nullable|string',
             'subscription_package' => 'required|string',
+            'billing_type' => 'required|in:monthly,quarterly,yearly',
             'status' => 'boolean',
         ]);
 
