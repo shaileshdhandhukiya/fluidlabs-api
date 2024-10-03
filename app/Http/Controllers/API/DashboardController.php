@@ -21,7 +21,7 @@ class DashboardController extends BaseController
         try {
             // Fetch total counts from the respective models
             $totalCustomers = Customer::count();
-            $totalEmployees = User::where('role', 'employee')->count(); // Assuming 'role' defines employees
+            $totalEmployees = User::where('id', '!=', 1)->count(); // Assuming 'role' defines employees
             $totalProjects = Project::count();
             $totalTasks = Task::count();
 
