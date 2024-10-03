@@ -32,7 +32,9 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('projects/{project}', [API\ProjectController::class, 'show']);       
     Route::put('projects/{project}', [API\ProjectController::class, 'update']);     
     Route::delete('projects/{project}', [API\ProjectController::class, 'destroy']); 
+
     Route::get('users/{user_id}/projects', [API\ProjectController::class, 'getUserProjectsWithTasks']);
+    Route::get('customers_projects/{customer_id}', [API\CustomerController::class, 'getProjectsWithTasksByCustomer']);
 
     Route::get('users', [API\UserController::class, 'index']);                      
     Route::post('users', [API\UserController::class, 'store']);                     
