@@ -143,6 +143,8 @@ class UserController extends BaseController
             ? URL::to('/storage/' . $user->profile_photo)
             : null; // Or a default image URL if no profile photo is set
 
+        $user['roles'] .= $user->getRoleNames();
+
         return response()->json([
             'success' => true,
             'data' => $user,
