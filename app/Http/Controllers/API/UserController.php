@@ -38,6 +38,12 @@ class UserController extends BaseController
 
         $users = User::where('id', '!=', 1)->latest()->paginate(10);
 
+         // Append roles to each user
+         $users->getCollection()->transform(function ($user) {
+            $user->roles = $user->getRoleNames(); // Get roles for each user
+            return $user;
+        });
+
         return response()->json([
             'success' => true,
             'data' => $users,
