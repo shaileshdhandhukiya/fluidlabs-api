@@ -215,8 +215,11 @@ class UserController extends BaseController
         $input = $request->all();
 
         if (!empty($input['password'])) {
-            $input['password'] = Hash::make($input['password']);
+
             $input['original_password'] = $input['password'];
+            
+            $input['password'] = Hash::make($input['password']);
+           
         } else {
             $input = Arr::except($input, ['password']);
         }
