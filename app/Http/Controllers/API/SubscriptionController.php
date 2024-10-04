@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\Validator;
 class SubscriptionController extends Controller
 {
 
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('permission:subscriptions_package-list|subscriptions_package-create|subscriptions_package-edit|subscriptions_package-delete', ['only' => ['index', 'store']]);
+        $this->middleware('permission:subscriptions_package-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:subscriptions_package-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:subscriptions_package-delete', ['only' => ['destroy']]);
+    }
+
     public function index()
     {
         try {

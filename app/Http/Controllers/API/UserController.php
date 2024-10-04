@@ -16,6 +16,17 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends BaseController
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index','create','store']]);
+        $this->middleware('permission:user-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:user-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:user-delete', ['only' => ['destroy']]);
+    }
+
+
     /**
      * Display a listing of users.
      *
@@ -34,6 +45,24 @@ class UserController extends BaseController
         ], 200); // HTTP 200 OK
     }
 
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create(): JsonResponse
+    {
+
+        $roles = Role::pluck('name','name')->all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $roles,
+            'status' => 200,
+        ], 200); // HTTP 200 OK
+    }
+    
     /**
      * Store a newly created user in storage.
      *
@@ -50,11 +79,11 @@ class UserController extends BaseController
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
-            'role' => 'required|string',
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:12',
+            'roles' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -137,7 +166,6 @@ class UserController extends BaseController
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
-            'role' => 'required|string',
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
@@ -228,4 +256,6 @@ class UserController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
+
 }

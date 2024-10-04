@@ -9,6 +9,16 @@ use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('permission:task-list|task-create|task-edit|task-delete', ['only' => ['index', 'store']]);
+        $this->middleware('permission:task-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:task-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:task-delete', ['only' => ['destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */

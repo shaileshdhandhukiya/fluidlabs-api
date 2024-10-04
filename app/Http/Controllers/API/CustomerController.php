@@ -12,6 +12,16 @@ use Illuminate\Support\Facades\Log;
 
 class CustomerController extends BaseController
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('permission:customer-list|customer-create|customer-edit|customer-delete', ['only' => ['index', 'store']]);
+        $this->middleware('permission:customer-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:customer-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:customer-delete', ['only' => ['destroy']]);
+    }
+
     // Get all customers
     public function index(): JsonResponse
     {

@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Handler extends ExceptionHandler
 {
@@ -26,5 +27,19 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $exception)
+    {
+        // Catch the Spatie UnauthorizedException
+        if ($exception instanceof UnauthorizedException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have the necessary permissions to access this resource.',
+                'status' => 403, // HTTP 403 Forbidden
+            ], 403);
+        }
+
+        return parent::render($request, $exception);
     }
 }

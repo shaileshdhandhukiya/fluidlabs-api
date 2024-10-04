@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 
 class RoleController extends BaseController
 {
@@ -40,19 +41,63 @@ class RoleController extends BaseController
         return response()->json([
             'success' => true,
             'data' => [
-                'permission'=>$permission
+                'permission' => $permission
             ],
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
 
+    // public function store(Request $request): JsonResponse
+    // {
+
+    //     $data = $request->validate([
+    //         'name' => 'required|unique:roles,name',
+    //         'permission' => 'required',
+    //     ]);
+
+    //     dd($data);
+
+    //     $role = Role::create(['name' => $request->input('name')]);
+
+    //     $role->syncPermissions($request->input('permission'));
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Role created successfully.',
+    //         'data' => $role,
+    //         'status' => 201,
+    //     ], 201); // HTTP 201 Created
+    // }
+
     public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|unique:roles,name',
-            'permission' => 'required',
+
+        if (is_string($request->permission)) {
+            $request->merge([
+                'permission' => explode(',', $request->permission)
+            ]);
+        }
+
+        // dd(gettype($request->permission));
+
+        // Define validation rules
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|unique:roles,name',
+            'permission' => 'required|array',
+            // 'permission.*' => 'exists:permissions,id', // Ensure each permission exists in the permissions table
         ]);
 
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+                'status' => 422,
+            ], 422); // HTTP 422 Unprocessable Entity
+        }
+
+        // Proceed if validation passes
         $role = Role::create(['name' => $request->input('name')]);
         $role->syncPermissions($request->input('permission'));
 

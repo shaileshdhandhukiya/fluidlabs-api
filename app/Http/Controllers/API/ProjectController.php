@@ -11,6 +11,16 @@ use Exception;
 
 class ProjectController extends BaseController
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('permission:project-list|project-create|project-edit|project-delete', ['only' => ['index', 'store']]);
+        $this->middleware('permission:project-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:project-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:project-delete', ['only' => ['destroy']]);
+    }
+    
     /**
      * Display a listing of the resource.
      */
