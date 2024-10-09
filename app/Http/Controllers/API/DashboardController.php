@@ -26,7 +26,7 @@ class DashboardController extends BaseController
             $totalTasks = Task::count();
 
             // Fetch project analytics (completed vs pending)
-            $completedProjects = Project::where('status', 'finished')->count();
+            $completedProjects = Project::where('status', 'delivered')->count();
             $pendingProjects = Project::whereIn('status', ['not started', 'in progress', 'on hold', 'cancelled'])->count();
 
             // Return the data in a JSON response

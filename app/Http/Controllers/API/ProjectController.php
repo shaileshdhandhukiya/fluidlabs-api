@@ -50,7 +50,7 @@ class ProjectController extends BaseController
         $validator = Validator::make($request->all(), [
             'project_name' => 'required|string',
             'customer_id' => 'required|exists:customers,id',
-            'status' => 'required|in:not started,in progress,on hold,cancelled,finished',
+            'status' => 'required|in:not started,in progress,on hold,cancelled,delivered',
             'progress' => 'nullable|integer',
             'members' => 'required|array',
             'estimated_hours' => 'nullable|integer',
@@ -127,8 +127,7 @@ class ProjectController extends BaseController
         $validator = Validator::make($request->all(), [
             'project_name' => 'required|string',
             'customer_id' => 'required|exists:customers,id',
-            // 'status' => 'required|in:not started,in progress,on hold,cancelled,finished',
-            'status' => 'required|in:not started,in progress,on hold,cancelled,delivered', // Updated enum
+            'status' => 'required|in:not started,in progress,on hold,cancelled,delivered',
             'progress' => 'nullable|integer',
             'members' => 'required|array',
             'estimated_hours' => 'nullable|integer',
