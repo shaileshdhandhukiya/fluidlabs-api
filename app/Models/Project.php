@@ -27,4 +27,13 @@ class Project extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    // Update the status enum to reflect the new 'delivered' value
+    const STATUS = [
+        'NOT_STARTED' => 'not started',
+        'IN_PROGRESS' => 'in progress',
+        'ON_HOLD' => 'on hold',
+        'CANCELLED' => 'cancelled',
+        'DELIVERED' => 'delivered',  // Changed from 'finished' to 'delivered'
+    ];
 }
