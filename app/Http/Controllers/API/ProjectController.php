@@ -191,8 +191,6 @@ class ProjectController extends BaseController
             $projects = Project::whereJsonContains('members', $user_id)
                 ->with('tasks') // Assuming a Project has a 'tasks' relationship
                 ->get();
-
-
             
             if ($projects->isEmpty()) {
                 return response()->json([

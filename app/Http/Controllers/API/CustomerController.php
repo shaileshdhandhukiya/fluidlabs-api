@@ -49,7 +49,7 @@ class CustomerController extends BaseController
             'country' => 'required|string|max:100',
             'zip_code' => 'required|string|max:20',
             'description' => 'nullable|string',
-            'subscription_package' => 'required|string',
+            'subscription_package' => 'nullable|string',
             'billing_type' => 'required|in:monthly,quarterly,yearly',
             'status' => 'boolean',
         ]);
@@ -118,7 +118,7 @@ class CustomerController extends BaseController
             'country' => 'required|string|max:100',
             'zip_code' => 'required|string|max:20',
             'description' => 'nullable|string',
-            'subscription_package' => 'required|string',
+            'subscription_package' => 'nullable|string',
             'billing_type' => 'required|in:monthly,quarterly,yearly',
             'status' => 'boolean',
         ]);
