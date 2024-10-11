@@ -40,7 +40,7 @@ class CustomerController extends BaseController
             'company' => 'required|string|max:255',
             'customer_name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
-            'currency' => 'required|string|max:10',
+            'currency' => 'nullable|string|max:10',
             'email' => 'required|string|email|max:255|unique:customers',
             'website' => 'nullable|string|max:255',
             'office_address' => 'required|string',
@@ -50,7 +50,7 @@ class CustomerController extends BaseController
             'zip_code' => 'required|string|max:20',
             'description' => 'nullable|string',
             'subscription_package' => 'nullable|string',
-            'billing_type' => 'required|in:monthly,quarterly,yearly',
+            'billing_type' => 'nullable|in:monthly,quarterly,yearly',
             'status' => 'boolean',
         ]);
 
@@ -109,7 +109,7 @@ class CustomerController extends BaseController
             'company' => 'required|string|max:255',
             'customer_name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
-            'currency' => 'required|string|max:10',
+            'currency' => 'nullable|string|max:10',
             'email' => 'required|string|email|max:255|unique:customers,email,' . $customer->id,
             'website' => 'nullable|string|max:255',
             'office_address' => 'required|string',
@@ -119,7 +119,7 @@ class CustomerController extends BaseController
             'zip_code' => 'required|string|max:20',
             'description' => 'nullable|string',
             'subscription_package' => 'nullable|string',
-            'billing_type' => 'required|in:monthly,quarterly,yearly',
+            'billing_type' => 'nullable|in:monthly,quarterly,yearly',
             'status' => 'boolean',
         ]);
 
