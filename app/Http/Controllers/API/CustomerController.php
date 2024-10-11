@@ -62,7 +62,16 @@ class CustomerController extends BaseController
             ], 422);
         }
 
-        $customer = Customer::create($request->all());
+
+        // Create a new customer
+        $customerData = $request->only([
+            'company', 'customer_name', 'phone', 'currency', 'email', 'website', 
+            'office_address', 'city', 'state', 'country', 'zip_code', 
+            'description', 'subscription_package', 'billing_type', 'status'
+        ]);
+
+        $customer = Customer::create($customerData);
+
         return response()->json([
             'success' => true,
             'data' => $customer,
@@ -133,20 +142,9 @@ class CustomerController extends BaseController
 
         // Update the customer record with valid data
         $customer->update($request->only([
-            'company',
-            'customer_name',
-            'phone',
-            'currency',
-            'email',
-            'website',
-            'office_address',
-            'city',
-            'state',
-            'country',
-            'zip_code',
-            'description',
-            'subscription_package',
-            'status'
+            'company', 'customer_name', 'phone', 'currency', 'email', 
+            'website', 'office_address', 'city', 'state', 'country', 
+            'zip_code', 'description', 'subscription_package', 'billing_type', 'status'
         ]));
 
         return response()->json([
