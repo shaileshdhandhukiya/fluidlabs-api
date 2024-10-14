@@ -18,7 +18,8 @@ class Task extends Model
         'assignees',
         'task_description',
         'status',
-        'attach_file'
+        'attach_file',
+        'parent_task_id'
     ];
 
     protected $casts = [
@@ -33,5 +34,21 @@ class Task extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Relationship to get sub-tasks of a task.
+     */
+    public function subTasks()
+    {
+        return $this->hasMany(Task::class, 'parent_task_id')->with('subTasks');
+    }
+
+    /**
+     * Relationship to get the parent task.
+     */
+    public function parentTask()
+    {
+        return $this->belongsTo(Task::class, 'parent_task_id');
     }
 }

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController as BaseController;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use Illuminate\Support\Facades\Validator;
 
-class TaskController extends Controller
+class TaskController extends BaseController
 {
 
     public function __construct()
@@ -151,7 +151,7 @@ class TaskController extends Controller
             $filePath = $request->file('attach_file')->store('task_files', 'public');
             $taskData['attach_file'] = $filePath;
         }
-    
+
         $task->update($taskData);
 
         return response()->json([
@@ -184,5 +184,180 @@ class TaskController extends Controller
             'message' => 'Task deleted successfully',
             'status' => 200,
         ], 200); // HTTP 200 OK
+    }
+
+    /* 
+    * Get Sub-Tasks for a Task
+     */
+    public function getSubTasks($id)
+    {
+        $task = Task::with('subTasks')->find($id);
+
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task not found',
+                'status' => 404,
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $task->subTasks,
+            'message' => 'Sub-tasks retrieved successfully',
+            'status' => 200,
+        ], 200);
+    }
+
+    /* 
+    * Store Sub-Tasks for a Task
+    */
+    public function createSubTask(Request $request, $id)
+    {
+        $parentTask = Task::find($id);
+
+        if (!$parentTask) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parent task not found',
+                'status' => 404,
+            ], 404);
+        }
+
+        // Validate sub-task data
+        $validator = Validator::make($request->all(), [
+            'subject' => 'required|string',
+            'start_date' => 'required|date',
+            'due_date' => 'required|date',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'assignees' => 'required|array',
+            'task_description' => 'nullable|string',
+            'status' => 'required|in:not started,in progress,testing,awaiting feedback,completed',
+            'attach_file' => 'nullable|file|mimes:jpg,png,pdf,doc,docx',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+                'status' => 400,
+            ], 400);
+        }
+
+        $taskData = $validator->validated();
+        $taskData['parent_task_id'] = $id;
+
+        // Handle file upload
+        if ($request->hasFile('attach_file')) {
+            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $taskData['attach_file'] = $filePath;
+        }
+
+        $subTask = Task::create($taskData);
+
+        return response()->json([
+            'success' => true,
+            'data' => $subTask,
+            'message' => 'Sub-task created successfully',
+            'status' => 201,
+        ], 201);
+    }
+
+    /* 
+    * Update Sub-Tasks for a Task
+    */
+    public function updateSubTask(Request $request, $task_id, $subtask_id)
+    {
+        $task = Task::find($task_id);
+
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parent task not found',
+                'status' => 404,
+            ], 404);
+        }
+
+        $subTask = Task::find($subtask_id);
+
+        if (!$subTask || $subTask->parent_task_id != $task_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub-task not found or invalid parent',
+                'status' => 404,
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'subject' => 'required|string',
+            'start_date' => 'required|date',
+            'due_date' => 'required|date',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'assignees' => 'required|array',
+            'task_description' => 'nullable|string',
+            'status' => 'required|in:not started,in progress,testing,awaiting feedback,completed',
+            'attach_file' => 'nullable|file|mimes:jpg,png,pdf,doc,docx',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+                'status' => 400,
+            ], 400);
+        }
+
+        $taskData = $validator->validated();
+
+        // Handle file upload
+        if ($request->hasFile('attach_file')) {
+            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $taskData['attach_file'] = $filePath;
+        }
+
+        $subTask->update($taskData);
+
+        return response()->json([
+            'success' => true,
+            'data' => $subTask,
+            'message' => 'Sub-task updated successfully',
+            'status' => 200,
+        ], 200);
+    }
+
+    /* 
+    * Delete Sub-Tasks for a Task
+    */
+    public function destroySubTask($task_id, $subtask_id)
+    {
+        $task = Task::find($task_id);
+
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parent task not found',
+                'status' => 404,
+            ], 404);
+        }
+
+        $subTask = Task::find($subtask_id);
+
+        if (!$subTask || $subTask->parent_task_id != $task_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub-task not found or invalid parent',
+                'status' => 404,
+            ], 404);
+        }
+
+        $subTask->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sub-task deleted successfully',
+            'status' => 200,
+        ], 200);
     }
 }
