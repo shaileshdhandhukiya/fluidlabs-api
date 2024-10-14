@@ -224,6 +224,8 @@ class TaskController extends BaseController
             ], 404);
         }
 
+        $project_id = $parentTask->project_id;
+
         // Validate sub-task data
         $validator = Validator::make($request->all(), [
             'subject' => 'required|string',
@@ -247,7 +249,8 @@ class TaskController extends BaseController
 
         $taskData = $validator->validated();
         $taskData['parent_task_id'] = $id;
-
+        $taskData['project_id'] = $project_id;
+        
         // Handle file upload
         if ($request->hasFile('attach_file')) {
             $filePath = $request->file('attach_file')->store('task_files', 'public');
