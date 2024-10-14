@@ -38,11 +38,13 @@ class CommentController extends BaseController
      */
     public function store(Request $request, $task_id)
     {
+      
         $validator = Validator::make($request->all(), [
             'comment' => 'required|string',
             'attachment' => 'nullable|file|max:10240',
         ]);
 
+        
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -51,17 +53,16 @@ class CommentController extends BaseController
                 'status' => 400,
             ], 400);
         }
-
+       
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
             $attachmentPath = $request->file('attachment')->store('attachments');
         }
-
        // Create the comment
         $comment = Comment::create([
             'task_id' => $task_id,
             'user_id' => auth()->id(),
-            'comment' => $request->content,
+            'comment' => $request->comment,
             'attachment' => $attachmentPath,
         ]);
 
@@ -115,7 +116,7 @@ class CommentController extends BaseController
         }
 
         // Update the comment's content
-        $comment->content = $request->content;
+        $comment->comment = $request->comment;
         $comment->save();
 
         return response()->json([
