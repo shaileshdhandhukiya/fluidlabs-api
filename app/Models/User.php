@@ -19,7 +19,17 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        'first_name','last_name','profile_photo','type','phone','date_of_birth','designation','date_of_join','email','password','original_password'
+        'first_name',
+        'last_name',
+        'profile_photo',
+        'type',
+        'phone',
+        'date_of_birth',
+        'designation',
+        'date_of_join',
+        'email',
+        'password',
+        'original_password'
     ];
 
     /**
@@ -41,4 +51,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

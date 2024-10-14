@@ -21,7 +21,6 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 Route::post('login', [RegisterController::class, 'login'])->name('login');
 
-
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
     // dashboard Analytics
@@ -35,6 +34,17 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::get('users/{user_id}/projects', [API\ProjectController::class, 'getUserProjectsWithTasks']);
     Route::get('customers_projects/{customer_id}', [API\CustomerController::class, 'getProjectsWithTasksByCustomer']);
+
+    Route::get('tasks', [API\TaskController::class, 'index']);                
+    Route::post('tasks', [API\TaskController::class, 'store']);               
+    Route::get('tasks/{id}', [API\TaskController::class, 'show']);          
+    Route::put('tasks/{id}', [API\TaskController::class, 'update']);        
+    Route::delete('tasks/{id}', [API\TaskController::class, 'destroy']);
+
+    Route::get('tasks/{task_id}/comments', [API\CommentController::class, 'index']);
+    Route::post('tasks/{task_id}/comments', [API\CommentController::class, 'store']); 
+    Route::put('comments/{id}', [API\CommentController::class, 'update']); 
+    Route::delete('comments/{id}', [API\CommentController::class, 'destroy']);
 
     Route::get('users', [API\UserController::class, 'index']);                      
     Route::post('users', [API\UserController::class, 'store']);                     
@@ -62,18 +72,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::put('/customers/{id}', [API\CustomerController::class, 'update']);   
     Route::delete('/customers/{id}', [API\CustomerController::class, 'destroy']); 
 
-    Route::get('projects', [API\ProjectController::class, 'index']);               
-    Route::post('projects', [API\ProjectController::class, 'store']);               
-    Route::get('projects/{id}', [API\ProjectController::class, 'show']);       
-    Route::put('projects/{id}', [API\ProjectController::class, 'update']);     
-    Route::delete('projects/{id}', [API\ProjectController::class, 'destroy']);
-
-    Route::get('tasks', [API\TaskController::class, 'index']);                
-    Route::post('tasks', [API\TaskController::class, 'store']);               
-    Route::get('tasks/{id}', [API\TaskController::class, 'show']);          
-    Route::put('tasks/{id}', [API\TaskController::class, 'update']);        
-    Route::delete('tasks/{id}', [API\TaskController::class, 'destroy']);
-
     Route::post('/email/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
         return response()->json(['message' => 'Verification email resent']);
@@ -92,4 +90,3 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
 
 });
-

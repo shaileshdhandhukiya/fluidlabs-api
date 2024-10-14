@@ -55,7 +55,7 @@ class TaskController extends Controller
             'assignees' => 'required|array',
             'task_description' => 'nullable|string',
             'status' => 'required|in:not started,in progress,testing,awaiting feedback,completed',
-            'attach_file' => 'nullable|string',
+            'attach_file' => 'nullable|file|mimes:jpg,png,pdf,doc,docx',
         ]);
 
         if ($validator->fails()) {
@@ -67,7 +67,16 @@ class TaskController extends Controller
             ], 400); // HTTP 400 Bad Request
         }
 
-        $task = Task::create($validator->validated());
+        $taskData = $validator->validated();
+
+        // Handle file upload
+        if ($request->hasFile('attach_file')) {
+            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $taskData['attach_file'] = $filePath;
+        }
+
+        $task = Task::create($taskData);
+
         return response()->json([
             'success' => true,
             'data' => $task,
@@ -123,7 +132,7 @@ class TaskController extends Controller
             'assignees' => 'required|array',
             'task_description' => 'nullable|string',
             'status' => 'required|in:not started,in progress,testing,awaiting feedback,completed',
-            'attach_file' => 'nullable|string',
+            'attach_file' => 'nullable|file|mimes:jpg,png,pdf,doc,docx',
         ]);
 
         if ($validator->fails()) {
@@ -135,7 +144,15 @@ class TaskController extends Controller
             ], 400); // HTTP 400 Bad Request
         }
 
-        $task->update($validator->validated());
+        $taskData = $validator->validated();
+
+        // Handle file upload
+        if ($request->hasFile('attach_file')) {
+            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $taskData['attach_file'] = $filePath;
+        }
+    
+        $task->update($taskData);
 
         return response()->json([
             'success' => true,
