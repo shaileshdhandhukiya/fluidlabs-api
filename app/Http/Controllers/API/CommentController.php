@@ -61,7 +61,7 @@ class CommentController extends BaseController
         $comment = Comment::create([
             'task_id' => $task_id,
             'user_id' => auth()->id(),
-            'content' => $request->content,
+            'comment' => $request->content,
             'attachment' => $attachmentPath,
         ]);
 
@@ -89,7 +89,7 @@ class CommentController extends BaseController
         }
 
         $validator = Validator::make($request->all(), [
-            'content' => 'required|string',
+            'comment' => 'required|string',
             'attachment' => 'nullable|file|max:10240', // 10MB max file size
         ]);
 
