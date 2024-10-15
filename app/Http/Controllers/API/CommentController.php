@@ -33,6 +33,26 @@ class CommentController extends BaseController
         ], 200);
     }
 
+    public function show($id)
+    {
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Comment not found',
+                'status' => 404
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $comment,
+            'message' => 'Comment retrieved successfully',
+            'status' => 200
+        ], 200);
+    }
+    
     /**
      * Store a newly created comment.
      */
@@ -73,6 +93,7 @@ class CommentController extends BaseController
             'status' => 201,
         ], 201);
     }
+
 
     /**
      * Update the specified comment.

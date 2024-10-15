@@ -53,12 +53,13 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     // comments routes
     Route::get('tasks/{task_id}/comments', [API\CommentController::class, 'index']);
     Route::post('tasks/{task_id}/comments', [API\CommentController::class, 'store']); 
+    Route::get('comments/{id}', [API\CommentController::class, 'show']);     
     Route::put('comments/{id}', [API\CommentController::class, 'update']); 
     Route::delete('comments/{id}', [API\CommentController::class, 'destroy']);
 
     // user routes
     Route::get('users', [API\UserController::class, 'index']);                      
-    Route::post('users', [API\UserController::class, 'store']);                     
+    Route::post('users', [API\UserController::class, 'store']);                    
     Route::get('users/{id}', [API\UserController::class, 'show']);                  
     Route::put('users/{id}', [API\UserController::class, 'update']);                
     Route::delete('users/{id}', [API\UserController::class, 'destroy']);   
