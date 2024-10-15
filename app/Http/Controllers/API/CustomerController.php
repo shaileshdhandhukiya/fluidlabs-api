@@ -25,7 +25,8 @@ class CustomerController extends BaseController
     // Get all customers
     public function index(): JsonResponse
     {
-        $customers = Customer::latest()->paginate(10);
+        $customers = Customer::latest()->get();
+        
         return response()->json([
             'success' => true,
             'data' => $customers,

@@ -33,8 +33,10 @@ class UserController extends BaseController
      */
     public function index(Request $request): JsonResponse
     {
+        // Build query to fetch all users except the one with id = 1
         $query = User::where('id', '!=', 1)->latest();
 
+        // Apply search filter if it exists
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -44,25 +46,23 @@ class UserController extends BaseController
             });
         }
 
+        // Retrieve all users without pagination
         $users = $query->get();
 
-        $users->getCollection()->transform(function ($user) {
-            $user->roles = $user->getRoleNames(); 
+        // Transform the collection to append roles to each user
+        $users->transform(function ($user) {
+            $user->roles = $user->getRoleNames(); // Get roles for each user
             return $user;
         });
 
+        // Return the users without pagination metadata
         return response()->json([
             'success' => true,
-            'data' => $users->items(),
-            'meta' => [
-                'total' => $users->total(),
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-                'per_page' => $users->perPage(),
-            ],
+            'data' => $users,  // No pagination data here, just the user list
             'status' => 200,
-        ], 200);
+        ], 200); // HTTP 200 OK
     }
+
 
 
     /**
