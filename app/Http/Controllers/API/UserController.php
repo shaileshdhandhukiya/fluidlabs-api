@@ -44,9 +44,8 @@ class UserController extends BaseController
             });
         }
 
-        $users = $query->paginate(10);
+        $users = $query->get();
 
-        // Append roles to each user
         $users->getCollection()->transform(function ($user) {
             $user->roles = $user->getRoleNames(); 
             return $user;
