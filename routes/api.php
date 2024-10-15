@@ -47,6 +47,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     // Sub-task routes
     Route::get('tasks/{id}/subtasks', [API\TaskController::class, 'getSubTasks']);
     Route::post('tasks/{id}/subtasks', [API\TaskController::class, 'createSubTask']);
+    Route::get('tasks/{task_id}/subtasks/{subtask_id}', [API\TaskController::class, 'getSubTaskById']);
     Route::put('tasks/{task_id}/subtasks/{subtask_id}', [API\TaskController::class, 'updateSubTask']);
     Route::delete('tasks/{task_id}/subtasks/{subtask_id}', [API\TaskController::class, 'destroySubTask']);
 

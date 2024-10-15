@@ -209,6 +209,42 @@ class TaskController extends BaseController
         ], 200);
     }
 
+    /**
+     * Get a specific sub-task by ID.
+     */
+    public function getSubTaskById($task_id, $subtask_id)
+    {
+        // Find the parent task by ID
+        $task = Task::find($task_id);
+
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parent task not found',
+                'status' => 404,
+            ], 404); // HTTP 404 Not Found
+        }
+
+        // Find the sub-task by ID and check if it belongs to the parent task
+        $subTask = Task::find($subtask_id);
+
+        if (!$subTask || $subTask->parent_task_id != $task_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub-task not found or invalid parent',
+                'status' => 404,
+            ], 404); // HTTP 404 Not Found
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $subTask,
+            'message' => 'Sub-task retrieved successfully',
+            'status' => 200,
+        ], 200); // HTTP 200 OK
+    }
+
+
     /* 
     * Store Sub-Tasks for a Task
     */
@@ -250,7 +286,7 @@ class TaskController extends BaseController
         $taskData = $validator->validated();
         $taskData['parent_task_id'] = $id;
         $taskData['project_id'] = $project_id;
-        
+
         // Handle file upload
         if ($request->hasFile('attach_file')) {
             $filePath = $request->file('attach_file')->store('task_files', 'public');

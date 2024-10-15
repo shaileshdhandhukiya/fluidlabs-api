@@ -20,35 +20,49 @@ class UserController extends BaseController
     public function __construct()
     {
         $this->middleware('auth:api');
-        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index','create','store']]);
+        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index', 'create', 'store']]);
         $this->middleware('permission:user-create', ['only' => ['create', 'store']]);
         $this->middleware('permission:user-edit', ['only' => ['edit', 'update']]);
         $this->middleware('permission:user-delete', ['only' => ['destroy']]);
     }
 
-
     /**
-     * Display a listing of users.
+     * Display a listing of users with optional search query.
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
-        // $users = User::latest()->paginate(10);
+        $query = User::where('id', '!=', 1)->latest();
 
-        $users = User::where('id', '!=', 1)->latest()->paginate(10);
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
 
-         // Append roles to each user
-         $users->getCollection()->transform(function ($user) {
-            $user->roles = $user->getRoleNames(); // Get roles for each user
+        $users = $query->paginate(10);
+
+        // Append roles to each user
+        $users->getCollection()->transform(function ($user) {
+            $user->roles = $user->getRoleNames(); 
             return $user;
         });
 
         return response()->json([
             'success' => true,
-            'data' => $users,
+            'data' => $users->items(),
+            'meta' => [
+                'total' => $users->total(),
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+            ],
             'status' => 200,
-        ], 200); // HTTP 200 OK
+        ], 200);
     }
 
 
@@ -60,7 +74,7 @@ class UserController extends BaseController
     public function create(): JsonResponse
     {
 
-        $roles = Role::pluck('name','name')->all();
+        $roles = Role::pluck('name', 'name')->all();
 
         return response()->json([
             'success' => true,
@@ -68,7 +82,7 @@ class UserController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
-    
+
     /**
      * Store a newly created user in storage.
      *
@@ -217,9 +231,8 @@ class UserController extends BaseController
         if (!empty($input['password'])) {
 
             $input['original_password'] = $input['password'];
-            
+
             $input['password'] = Hash::make($input['password']);
-           
         } else {
             $input = Arr::except($input, ['password']);
         }
@@ -267,6 +280,4 @@ class UserController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
-
-
 }
