@@ -71,7 +71,7 @@ class TaskController extends BaseController
 
         // Handle file upload
         if ($request->hasFile('attach_file')) {
-            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $filePath = $request->file('attach_file')->store('uploads/task_files', 'public');
             $taskData['attach_file'] = $filePath;
         }
 
@@ -148,7 +148,7 @@ class TaskController extends BaseController
 
         // Handle file upload
         if ($request->hasFile('attach_file')) {
-            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $filePath = $request->file('attach_file')->store('uploads/task_files', 'public');
             $taskData['attach_file'] = $filePath;
         }
 
@@ -289,7 +289,7 @@ class TaskController extends BaseController
 
         // Handle file upload
         if ($request->hasFile('attach_file')) {
-            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $filePath = $request->file('attach_file')->store('uploads/task_files', 'public');
             $taskData['attach_file'] = $filePath;
         }
 
@@ -352,7 +352,7 @@ class TaskController extends BaseController
 
         // Handle file upload
         if ($request->hasFile('attach_file')) {
-            $filePath = $request->file('attach_file')->store('task_files', 'public');
+            $filePath = $request->file('attach_file')->store('uploads/task_files', 'public');
             $taskData['attach_file'] = $filePath;
         }
 
