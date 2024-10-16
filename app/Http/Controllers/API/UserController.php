@@ -73,6 +73,8 @@ class UserController extends BaseController
     public function create(): JsonResponse
     {
 
+        // return "hello bala";
+        
         $roles = Role::pluck('name', 'name')->all();
 
         return response()->json([
@@ -90,6 +92,7 @@ class UserController extends BaseController
      */
     public function store(Request $request): JsonResponse
     {
+        // print_r($request->all());
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
@@ -120,9 +123,9 @@ class UserController extends BaseController
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
             $filename = time() . '.' . $file->getClientOriginalExtension();
-            // $file->storeAs('uploads/profile_photos', $filename, 'public');
-            $file->store('uploads/profile_photos');
-            $input['profile_photo'] = 'uploads/profile_photos/' . $filename;
+            $file->storeAs('uploads/profile_photos', $filename, 'public');
+            // $file->store('profile_photos', 'public');
+            $input['profile_photo'] = 'profile_photos/' . $filename;
         }
 
         $input['original_password'] = $input['password'];
