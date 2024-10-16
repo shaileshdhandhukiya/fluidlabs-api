@@ -120,7 +120,8 @@ class UserController extends BaseController
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
             $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('uploads/profile_photos', $filename, 'public');
+            // $file->storeAs('uploads/profile_photos', $filename, 'public');
+            $file->store('uploads/profile_photos');
             $input['profile_photo'] = 'uploads/profile_photos/' . $filename;
         }
 

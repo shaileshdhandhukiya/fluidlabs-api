@@ -10,11 +10,22 @@ class Project extends Model
     use HasFactory;
 
     protected $fillable = [
-        'project_name', 'customer_id', 'status', 'progress', 'members', 'estimated_hours', 'start_date', 'deadline', 'description', 'send_project_created_email'
+        'project_name',
+        'customer_id',
+        'status',
+        'progress',
+        'members',
+        'estimated_hours',
+        'start_date',
+        'deadline',
+        'description',
+        'project_files',
+        'send_project_created_email'
     ];
 
     protected $casts = [
         'members' => 'array', // Store members as array
+        'project_files' => 'array',
         'send_project_created_email' => 'boolean',
     ];
 

@@ -11,7 +11,6 @@ use Exception;
 
 class ProjectController extends BaseController
 {
-
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -20,7 +19,7 @@ class ProjectController extends BaseController
         $this->middleware('permission:project-edit', ['only' => ['edit', 'update']]);
         $this->middleware('permission:project-delete', ['only' => ['destroy']]);
     }
-    
+
     /**
      * Display a listing of the resource.
      */
@@ -33,7 +32,7 @@ class ProjectController extends BaseController
             'data' => $projects,
             'message' => 'Projects retrieved successfully',
             'status' => 200,
-        ], 200); // HTTP 200 OK
+        ], 200);
     }
 
     /**
@@ -58,6 +57,7 @@ class ProjectController extends BaseController
             'deadline' => 'nullable|date',
             'description' => 'nullable|string',
             'send_project_created_email' => 'nullable|boolean',
+            'project_files.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000', // Validate multiple attachments
         ]);
 
         if ($validator->fails()) {
@@ -69,7 +69,29 @@ class ProjectController extends BaseController
             ], 400); // HTTP 400 Bad Request
         }
 
-        $project = Project::create($validator->validated());
+        // Create the project first
+        $projectData = $validator->validated();
+        $project = Project::create($projectData);
+
+
+        // dd($request->file('project_files'));
+
+        // Handle multiple file uploads
+        $filePaths = [];
+
+        if ($request->hasFile('project_files')) {
+            foreach ($request->file('project_files') as $file) {
+                $path = $file->store('uploads/projects'); // Store the file
+                $filePaths[] = $path; // Add the path to the array
+            }
+        }
+
+        // Save the file paths to the project
+        $project->project_files = json_encode($filePaths);
+
+        // dd($project);
+
+        $project->save();
 
         return response()->json([
             'success' => true,
@@ -77,7 +99,6 @@ class ProjectController extends BaseController
             'message' => 'Project created successfully',
             'status' => 201,
         ], 201); // HTTP 201 Created
-
     }
 
     /**
@@ -92,7 +113,7 @@ class ProjectController extends BaseController
                 'success' => false,
                 'message' => 'Project not found',
                 'status' => 404,
-            ], 404); // HTTP 404 Not Found
+            ], 404);
         }
 
         return response()->json([
@@ -100,7 +121,7 @@ class ProjectController extends BaseController
             'data' => $project,
             'message' => 'Project retrieved successfully',
             'status' => 200,
-        ], 200); // HTTP 200 OK
+        ], 200);
     }
 
     /**
@@ -118,12 +139,14 @@ class ProjectController extends BaseController
             ], 404); // HTTP 404 Not Found
         }
 
+        // Handle members as before
         if (is_string($request->members)) {
             $request->merge([
                 'members' => explode(',', $request->members)
             ]);
         }
 
+        // Validate the request
         $validator = Validator::make($request->all(), [
             'project_name' => 'required|string',
             'customer_id' => 'required|exists:customers,id',
@@ -135,6 +158,7 @@ class ProjectController extends BaseController
             'deadline' => 'nullable|date',
             'description' => 'nullable|string',
             'send_project_created_email' => 'nullable|boolean',
+            'project_files.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000', // Validate multiple attachments
         ]);
 
         if ($validator->fails()) {
@@ -146,7 +170,22 @@ class ProjectController extends BaseController
             ], 400); // HTTP 400 Bad Request
         }
 
-        $project->update($validator->validated());
+        // Update the project first
+        $projectData = $validator->validated();
+        $project->update($projectData);
+
+        // Handle multiple file uploads
+        $filePaths = [];
+        if ($request->hasFile('project_files')) {
+            foreach ($request->file('project_files') as $file) {
+                $path = $file->store('projects'); // Store the file
+                $filePaths[] = $path; // Add the path to the array
+            }
+        }
+
+        // Save the file paths to the project
+        $project->project_files = json_encode($filePaths);
+        $project->save();
 
         return response()->json([
             'success' => true,
@@ -168,7 +207,7 @@ class ProjectController extends BaseController
                 'success' => false,
                 'message' => 'Project not found',
                 'status' => 404,
-            ], 404); // HTTP 404 Not Found
+            ], 404);
         }
 
         $project->delete();
@@ -177,39 +216,34 @@ class ProjectController extends BaseController
             'success' => true,
             'message' => 'Project deleted successfully',
             'status' => 200,
-        ], 200); // HTTP 200 OK
+        ], 200);
     }
 
-     /**
+    /**
      * Get all projects and linked tasks for a specific user.
      */
     public function getUserProjectsWithTasks($user_id)
     {
-
         try {
-            // Fetch projects where the user is a member (assuming 'members' field contains user IDs in an array)
             $projects = Project::whereJsonContains('members', $user_id)
-                ->with('tasks') // Assuming a Project has a 'tasks' relationship
+                ->with('tasks')
                 ->get();
-            
+
             if ($projects->isEmpty()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No projects found for the given user',
                     'status' => 404,
-                ], 404); // HTTP 404 Not Found
+                ], 404);
             }
 
-            // Return the projects along with their tasks
             return response()->json([
                 'success' => true,
                 'data' => $projects,
                 'message' => 'Projects and linked tasks retrieved successfully',
                 'status' => 200,
-            ], 200); // HTTP 200 OK
-
+            ], 200);
         } catch (Exception $e) {
-            // Log the error for debugging
             Log::error('Error retrieving projects and tasks: ' . $e->getMessage());
 
             return response()->json([
@@ -217,7 +251,7 @@ class ProjectController extends BaseController
                 'message' => 'Failed to retrieve projects and tasks',
                 'error' => $e->getMessage(),
                 'status' => 500,
-            ], 500); // HTTP 500 Internal Server Error
+            ], 500);
         }
     }
 }
