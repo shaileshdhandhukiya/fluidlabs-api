@@ -180,6 +180,7 @@ class UserController extends BaseController
      */
     public function update(Request $request, $id): JsonResponse
     {
+        
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
@@ -190,8 +191,8 @@ class UserController extends BaseController
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'required|string|min:12',
-            'roles' => 'nullable|string',
+            'password' => 'required|min:12',
+            'roles' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -202,6 +203,7 @@ class UserController extends BaseController
                 'status' => 422,
             ], 422); // HTTP 422 Unprocessable Entity
         }
+       
 
         $user = User::find($id);
 

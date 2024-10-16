@@ -44,7 +44,7 @@ class SubscriptionController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
             'description' => 'nullable',
-            'billing_duration' => 'required',
+            'billing_duration' => 'required|in:monthly,quarterly,yearly,half-yearly,one-time payment', // Updated
             'status' => 'required',
             'price' => 'required',
             'currency' => 'required'
@@ -93,7 +93,7 @@ class SubscriptionController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'billing_duration' => 'required|in:monthly,quarterly,yearly',
+            'billing_duration' => 'required|in:monthly,quarterly,yearly,half-yearly,one-time payment', 
             'status' => 'required|in:active,inactive',
             'price' => 'required|numeric|min:0',
         ]);
