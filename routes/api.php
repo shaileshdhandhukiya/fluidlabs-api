@@ -21,6 +21,9 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 Route::post('login', [RegisterController::class, 'login'])->name('login');
 
+Route::get('auth/google', [RegisterController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [RegisterController::class, 'handleGoogleCallback']);
+
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
     // dashboard Analytics
