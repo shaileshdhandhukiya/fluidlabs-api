@@ -39,7 +39,6 @@ class TaskController extends BaseController
      */
     public function store(Request $request)
     {
-
         if (is_string($request->assignees)) {
             $request->merge([
                 'assignees' => explode(',', $request->assignees)
@@ -69,10 +68,11 @@ class TaskController extends BaseController
 
         $taskData = $validator->validated();
 
-        // Handle file upload
+        // Handle file upload with original file name
         if ($request->hasFile('attach_file')) {
-            $filePath = $request->file('attach_file')->store('uploads/task_files', 'public');
-            $taskData['attach_file'] = $filePath;
+            $originalName = $request->file('attach_file')->getClientOriginalName();
+            $filePath = $request->file('attach_file')->storeAs('uploads/task_files', $originalName, 'public');
+            $taskData['attach_file'] = $filePath; // Save the file path with the original name
         }
 
         $task = Task::create($taskData);
@@ -84,6 +84,7 @@ class TaskController extends BaseController
             'status' => 201,
         ], 201); // HTTP 201 Created
     }
+
 
     /**
      * Display the specified resource.
@@ -146,10 +147,10 @@ class TaskController extends BaseController
 
         $taskData = $validator->validated();
 
-        // Handle file upload
         if ($request->hasFile('attach_file')) {
-            $filePath = $request->file('attach_file')->store('uploads/task_files', 'public');
-            $taskData['attach_file'] = $filePath;
+            $originalName = $request->file('attach_file')->getClientOriginalName();
+            $filePath = $request->file('attach_file')->storeAs('uploads/task_files', $originalName, 'public');
+            $taskData['attach_file'] = $filePath; 
         }
 
         $task->update($taskData);
@@ -161,6 +162,7 @@ class TaskController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
 
     /**
      * Remove the specified resource from storage.

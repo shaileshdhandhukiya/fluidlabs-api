@@ -77,7 +77,8 @@ class ProjectController extends BaseController
 
         if ($request->hasFile('project_files')) {
             foreach ($request->file('project_files') as $file) {
-                $path = $file->store('uploads/projects', 'public');
+                $originalName = $file->getClientOriginalName(); // Get original file name
+                $path = $file->storeAs('uploads/projects', $originalName, 'public'); // Store file with original name
                 $filePaths[] = $path; // Add the path to the array
             }
         }
@@ -171,12 +172,17 @@ class ProjectController extends BaseController
         $filePaths = [];
         if ($request->hasFile('project_files')) {
             foreach ($request->file('project_files') as $file) {
-                $path = $file->store('uploads/projects', 'public');
-                $filePaths[] = $path;
+                $originalName = $file->getClientOriginalName(); // Get original file name
+                $path = $file->storeAs('uploads/projects', $originalName, 'public'); // Store with original name
+                $filePaths[] = $path; // Add to file paths array
             }
         }
 
-        $project->project_files = json_encode($filePaths);
+        // If new files were uploaded, update the project files field
+        if (!empty($filePaths)) {
+            $project->project_files = $filePaths; // Save file paths as an array
+        }
+
         $project->save();
 
         return response()->json([
@@ -186,6 +192,7 @@ class ProjectController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
 
     /**
      * Remove the specified resource from storage.
