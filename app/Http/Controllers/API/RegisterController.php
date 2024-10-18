@@ -14,11 +14,6 @@ use Illuminate\Support\Str;
 class RegisterController extends BaseController
 {
 
-    public function redirectToGoogle()
-    {
-        return Socialite::driver('google')->stateless()->redirect();
-    }
-
     /**
      * Register api
      *
@@ -100,50 +95,60 @@ class RegisterController extends BaseController
         }
     }
 
-    public function handleGoogleCallback()
+    public function redirectToGoogle()
     {
-        try {
-            
-            $googleUser = Socialite::driver('google')->stateless()->user();
+        return Socialite::driver('google')->redirect();
+    }
 
-            // Check if the user already exists in the database
+    public function handleGoogleCallback(Request $request)
+    {
+        $request->validate([
+            'access_token' => 'required|string',
+        ]);
+
+        try {
+            // Use the access token to get the user details from Google
+            $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->access_token);
+
+            // Check if the user exists in the database
             $user = User::where('email', $googleUser->email)->first();
 
             if ($user) {
-                // User exists, log them in
+                // Log them in
                 Auth::login($user);
             } else {
-                // Create a new user if they don't exist
+                // Create a new user
                 $user = User::create([
                     'name' => $googleUser->name,
                     'email' => $googleUser->email,
-                    'password' => bcrypt(Str::random(16)), // Assign a random password for security
+                    'password' => bcrypt(Str::random(16)), // Random password
                     'email_verified_at' => now(),
                 ]);
             }
 
             // Generate the access token
-            $success["token"] = $user->createToken("auth_token")->accessToken;
-            $success["first_name"] = $user->first_name;
-            $success["last_name"] = $user->last_name;
-            $success["email"] = $user->email;
-            $success["role"] = $user->role; // Assuming role is part of your User model
-            $success["user_id"] = $user->id;
+            $success = [
+                "token" => $user->createToken("auth_token")->accessToken,
+                "first_name" => $user->first_name,
+                "last_name" => $user->last_name,
+                "email" => $user->email,
+                "role" => $user->role,
+                "user_id" => $user->id,
+            ];
 
             return response()->json([
                 'success' => true,
                 'data' => $success,
                 'message' => 'User logged in successfully via Google.',
                 'status' => 200
-            ], 200); // HTTP 200 OK
-
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Google login failed',
                 'error' => $e->getMessage(),
                 'status' => 500
-            ], 500); // HTTP 500 Internal Server Error
+            ], 500);
         }
     }
 }
