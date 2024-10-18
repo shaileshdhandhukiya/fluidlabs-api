@@ -9,6 +9,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Arr;
 use Illuminate\Http\JsonResponse;
@@ -73,8 +74,6 @@ class UserController extends BaseController
     public function create(): JsonResponse
     {
 
-        // return "hello bala";
-        
         $roles = Role::pluck('name', 'name')->all();
 
         return response()->json([
@@ -180,9 +179,12 @@ class UserController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $id)
     {
-        
+
+        // dd($request->all());
+        return response()->json($request->all());
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
@@ -193,8 +195,8 @@ class UserController extends BaseController
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'required|min:12',
-            'roles' => 'required'
+            'password' => 'nullable|min:12',
+            'roles' => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -205,8 +207,8 @@ class UserController extends BaseController
                 'status' => 422,
             ], 422); // HTTP 422 Unprocessable Entity
         }
-       
 
+        // Find the user by ID
         $user = User::find($id);
 
         if (!$user) {
@@ -214,35 +216,45 @@ class UserController extends BaseController
                 'success' => false,
                 'message' => 'User not found.',
                 'status' => 404,
-            ], 404); // HTTP 404 Not Found
+            ], 404);
         }
+
+        // Prepare input data
+        $input = $request->all();
 
         // Handle file upload for profile photo
         if ($request->hasFile('profile_photo')) {
-            // Delete old profile photo if necessary
+            // Delete old profile photo if exists
             if ($user->profile_photo) {
                 Storage::disk('public')->delete($user->profile_photo);
             }
 
-            $path = $request->file('profile_photo')->store('profile_photos', 'public');
-            $user->profile_photo = $path;
+            // Store the new profile photo
+            $file = $request->file('profile_photo');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('uploads/profile_photos', $filename, 'public');
+            $input['profile_photo'] = 'profile_photos/' . $filename;
+        } else {
+            // If no new profile photo is provided, keep the existing one
+            $input['profile_photo'] = $user->profile_photo;
         }
 
-        $input = $request->all();
-
+        // Hash password if provided
         if (!empty($input['password'])) {
-
             $input['original_password'] = $input['password'];
             $input['password'] = Hash::make($input['password']);
-            
         } else {
+            // Exclude password from input if not provided
             $input = Arr::except($input, ['password']);
         }
 
+        // Update user with the input data
         $user->update($input);
 
+        // Remove existing roles
         DB::table('model_has_roles')->where('model_id', $id)->delete();
 
+        // Assign new roles
         if ($request->input('roles')) {
             $user->assignRole($request->input('roles'));
         }
@@ -252,9 +264,8 @@ class UserController extends BaseController
             'message' => 'User updated successfully.',
             'data' => $user,
             'status' => 200,
-        ], 200); // HTTP 200 OK
+        ], 200);
     }
-
 
     /**
      * Remove the specified user from storage.
