@@ -24,7 +24,7 @@ class Project extends Model
     ];
 
     protected $casts = [
-        'members' => 'array', // Store members as array
+        'members' => 'array',
         'project_files' => 'array',
         'send_project_created_email' => 'boolean',
     ];

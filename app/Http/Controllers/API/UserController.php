@@ -92,7 +92,6 @@ class UserController extends BaseController
      */
     public function store(Request $request): JsonResponse
     {
-        // print_r($request->all());
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
@@ -124,7 +123,6 @@ class UserController extends BaseController
             $file = $request->file('profile_photo');
             $filename = time() . '.' . $file->getClientOriginalExtension();
             $file->storeAs('uploads/profile_photos', $filename, 'public');
-            // $file->store('profile_photos', 'public');
             $input['profile_photo'] = 'profile_photos/' . $filename;
         }
 
@@ -226,7 +224,6 @@ class UserController extends BaseController
                 Storage::disk('public')->delete($user->profile_photo);
             }
 
-            // Store the new profile photo
             $path = $request->file('profile_photo')->store('profile_photos', 'public');
             $user->profile_photo = $path;
         }
@@ -236,8 +233,8 @@ class UserController extends BaseController
         if (!empty($input['password'])) {
 
             $input['original_password'] = $input['password'];
-
             $input['password'] = Hash::make($input['password']);
+            
         } else {
             $input = Arr::except($input, ['password']);
         }

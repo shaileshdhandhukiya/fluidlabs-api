@@ -11,6 +11,7 @@ use Exception;
 
 class ProjectController extends BaseController
 {
+
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -57,7 +58,7 @@ class ProjectController extends BaseController
             'deadline' => 'nullable|date',
             'description' => 'nullable|string',
             'send_project_created_email' => 'nullable|boolean',
-            'project_files.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000', // Validate multiple attachments
+            'project_files.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000',
         ]);
 
         if ($validator->fails()) {
@@ -69,27 +70,20 @@ class ProjectController extends BaseController
             ], 400); // HTTP 400 Bad Request
         }
 
-        // Create the project first
         $projectData = $validator->validated();
         $project = Project::create($projectData);
 
-
-        // dd($request->file('project_files'));
-
-        // Handle multiple file uploads
         $filePaths = [];
 
         if ($request->hasFile('project_files')) {
             foreach ($request->file('project_files') as $file) {
-                $path = $file->store('uploads/projects'); // Store the file
+                $path = $file->store('uploads/projects', 'public');
                 $filePaths[] = $path; // Add the path to the array
             }
         }
 
-        // Save the file paths to the project
-        $project->project_files = json_encode($filePaths);
-
-        // dd($project);
+        // Save file paths as a JSON array in the database
+        $project->project_files = $filePaths;
 
         $project->save();
 
@@ -174,16 +168,14 @@ class ProjectController extends BaseController
         $projectData = $validator->validated();
         $project->update($projectData);
 
-        // Handle multiple file uploads
         $filePaths = [];
         if ($request->hasFile('project_files')) {
             foreach ($request->file('project_files') as $file) {
-                $path = $file->store('projects'); // Store the file
-                $filePaths[] = $path; // Add the path to the array
+                $path = $file->store('uploads/projects', 'public');
+                $filePaths[] = $path;
             }
         }
 
-        // Save the file paths to the project
         $project->project_files = json_encode($filePaths);
         $project->save();
 
@@ -225,6 +217,7 @@ class ProjectController extends BaseController
     public function getUserProjectsWithTasks($user_id)
     {
         try {
+
             $projects = Project::whereJsonContains('members', $user_id)
                 ->with('tasks')
                 ->get();
