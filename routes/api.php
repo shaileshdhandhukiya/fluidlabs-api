@@ -26,8 +26,18 @@ Route::post('auth/google/callback', [RegisterController::class, 'handleGoogleCal
 
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
+    // projects routes
+    Route::get('projects', [API\ProjectController::class, 'index']);               
+    Route::post('projects', [API\ProjectController::class, 'store']);               
+    Route::get('projects/{project}', [API\ProjectController::class, 'show']);       
+    Route::put('projects/{project}', [API\ProjectController::class, 'update']);     
+    Route::delete('projects/{project}', [API\ProjectController::class, 'destroy']); 
+
     // dashboard Analytics
     Route::get('dashboard/analytics', [API\DashboardController::class, 'index']);
+
+    // maintenances 
+    Route::apiResource('maintenances', API\MaintenanceController::class);
     
     // projects routes
     Route::get('projects', [API\ProjectController::class, 'index']);               

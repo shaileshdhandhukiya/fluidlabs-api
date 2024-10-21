@@ -114,6 +114,11 @@ class RegisterController extends BaseController
             $user = User::where('email', $googleUser->email)->first();
 
             if ($user) {
+
+                if (is_null($user->email_verified_at)) {
+                    $user->email_verified_at = now();
+                    $user->save(); // Save the updated user
+                }
                 // Log them in
                 Auth::login($user);
             } else {
