@@ -31,7 +31,8 @@ class DashboardController extends BaseController
             // Fetch the most recent 5 projects
             $recentProjects = Project::orderBy('created_at', 'desc')->take(5)->get(['id', 'project_name', 'status', 'created_at']); 
             
-            $recentTasks = Task::orderBy('created_at', 'desc')->take(5)->get(['id', 'subject', 'status', 'created_at', 'project_id']);
+            $recentTasks = Task::orderBy('created_at', 'desc')->take(5)->get(['id', 'subject', 'status', 'created_at', 'project_id','assignees']);
+
             // Return the data in a JSON response
             return response()->json([
                 'success' => true,
