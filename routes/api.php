@@ -26,19 +26,24 @@ Route::post('auth/google/callback', [RegisterController::class, 'handleGoogleCal
 
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
-    // projects routes
-    Route::get('projects', [API\ProjectController::class, 'index']);               
-    Route::post('projects', [API\ProjectController::class, 'store']);               
-    Route::get('projects/{project}', [API\ProjectController::class, 'show']);       
-    Route::put('projects/{project}', [API\ProjectController::class, 'update']);     
-    Route::delete('projects/{project}', [API\ProjectController::class, 'destroy']); 
+    // Start timer for a task
+    Route::post('task-timer/start', [API\TaskTimerController::class, 'startTimer']);
+
+    // Stop timer for a task
+    Route::post('task-timer/stop/{id}', [API\TaskTimerController::class, 'stopTimer']);
+
+    // Get total hours for all assignees
+    Route::get('task-timer/total-hours', [API\TaskTimerController::class, 'getAllTotalHours']);
+
+    // Get task timer details by ID
+    Route::get('task-timer/{id}', [API\TaskTimerController::class, 'getTaskTimer']);
 
     // dashboard Analytics
     Route::get('dashboard/analytics', [API\DashboardController::class, 'index']);
 
     // maintenances 
     Route::apiResource('maintenances', API\MaintenanceController::class);
-    
+
     // projects routes
     Route::get('projects', [API\ProjectController::class, 'index']);               
     Route::post('projects', [API\ProjectController::class, 'store']);               
