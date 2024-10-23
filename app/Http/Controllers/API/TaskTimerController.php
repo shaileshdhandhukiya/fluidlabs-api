@@ -36,7 +36,9 @@ class TaskTimerController extends BaseController
                 'data' => $taskTimer,
                 'status' => 200
             ], 200);
+            
         } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to start task timer',
@@ -142,6 +144,49 @@ class TaskTimerController extends BaseController
                 'message' => 'Task timer not found',
                 'status' => 404
             ], 404);
+        }
+    }
+
+    // Timer status
+    public function isTaskTimerRunning($taskId)
+    {
+        try {
+            // Check if there is a running timer for the given task
+            $timer = TaskTimer::where('task_id', $taskId)
+                ->whereNotNull('started_at')   // Timer has started
+                ->whereNull('stopped_at')      // Timer has not stopped
+                ->first();
+
+            if ($timer) {
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Task timer is running',
+                    'data' => [
+                        'task_id' => $taskId,
+                        'started_at' => $timer->started_at
+                    ],
+                    'status' => 200,
+                ], 200);
+
+            } else {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Task timer is not running',
+                    'status' => 200,
+                ], 200);
+
+            }
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check task timer status',
+                'error' => $e->getMessage(),
+                'status' => 500,
+            ], 500);
+
         }
     }
 }

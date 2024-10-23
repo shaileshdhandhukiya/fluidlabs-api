@@ -21,18 +21,22 @@ class DashboardController extends BaseController
             // Fetch total counts from the respective models
             $totalCustomers = Customer::count();
             $totalEmployees = User::where('id', '!=', 1)->count(); // Assuming 'role' defines employees
-            $totalProjects = Project::count();
-            $totalTasks = Task::count();
+            $totalProjects  = Project::count();
+            $totalTasks     = Task::count();
 
             // Fetch project analytics (completed vs pending)
-            $completedProjects = Project::where('status', 'delivered')->count();
-            $pendingProjects = Project::whereIn('status', ['not started', 'in progress', 'on hold', 'cancelled'])->count();
+            $completedProjects  = Project::where('status', 'delivered')->count();
+            $pendingProjects    = Project::whereIn('status', ['not started', 'in progress', 'on hold', 'cancelled'])->count();
 
             // Fetch the most recent 5 projects
-            $recentProjects = Project::orderBy('created_at', 'desc')->take(5)->get(['id', 'project_name', 'status', 'created_at']); 
-            
-            $recentTasks = Task::orderBy('created_at', 'desc')->take(5)->get(['id', 'subject', 'status', 'created_at', 'project_id','assignees']);
+            $recentProjects = Project::orderBy('created_at', 'desc')->take(5)->get(['id', 'project_name', 'status', 'customer_id', 'created_at']);
 
+            // Fetch the most recent 5 Tasks
+            $recentTasks    = Task::orderBy('created_at', 'desc')->take(5)->get(['id', 'subject', 'status', 'created_at', 'project_id', 'assignees']);
+
+
+            $teamMembers = User::all();
+            
             // Return the data in a JSON response
             return response()->json([
                 'success' => true,
@@ -46,7 +50,8 @@ class DashboardController extends BaseController
                         'pending_projects' => $pendingProjects
                     ],
                     'recent_projects' => $recentProjects,
-                    'recent_tasks'=>$recentTasks
+                    'recent_tasks' => $recentTasks,
+                    'team_members' => $teamMembers,
                 ],
                 'message' => 'Dashboard analytics retrieved successfully',
                 'status' => 200,
@@ -65,5 +70,4 @@ class DashboardController extends BaseController
             ], 500); // HTTP 500 Internal Server Error
         }
     }
-
 }

@@ -26,17 +26,11 @@ Route::post('auth/google/callback', [RegisterController::class, 'handleGoogleCal
 
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
-    // Start timer for a task
-    Route::post('task-timer/start', [API\TaskTimerController::class, 'startTimer']);
-
-    // Stop timer for a task
-    Route::post('task-timer/stop/{id}', [API\TaskTimerController::class, 'stopTimer']);
-
-    // Get total hours for all assignees
-    Route::get('task-timer/total-hours', [API\TaskTimerController::class, 'getAllTotalHours']);
-
-    // Get task timer details by ID
-    Route::get('task-timer/{id}', [API\TaskTimerController::class, 'getTaskTimer']);
+    Route::get('task-timer/status/{taskId}', [API\TaskTimerController::class, 'isTaskTimerRunning']);  // status check
+    Route::post('task-timer/start', [API\TaskTimerController::class, 'startTimer']);  // Start timer for a task
+    Route::post('task-timer/stop/{id}', [API\TaskTimerController::class, 'stopTimer']);   // Stop timer for a task
+    Route::get('task-timer/total-hours', [API\TaskTimerController::class, 'getAllTotalHours']);  // Get total hours for all assignees
+    Route::get('task-timer/{id}', [API\TaskTimerController::class, 'getTaskTimer']);   // Get task timer details by ID
 
     // dashboard Analytics
     Route::get('dashboard/analytics', [API\DashboardController::class, 'index']);
