@@ -163,6 +163,7 @@ class TaskTimerController extends BaseController
                     'success' => true,
                     'message' => 'Task timer is running',
                     'data' => [
+                        'timer_id' => $timer->id,  // Include the timer ID
                         'task_id' => $taskId,
                         'started_at' => $timer->started_at
                     ],
