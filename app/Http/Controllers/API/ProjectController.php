@@ -78,7 +78,7 @@ class ProjectController extends BaseController
         if ($request->hasFile('project_files')) {
             foreach ($request->file('project_files') as $file) {
                 $originalName = $file->getClientOriginalName(); // Get original file name
-                $path = $file->storeAs('uploads/projects', $originalName, 'public'); // Store file with original name
+                $path = $file->storeAs('uploads/projects', $originalName, 'public');
                 $filePaths[] = $path; // Add the path to the array
             }
         }
