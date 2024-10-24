@@ -26,9 +26,10 @@ Route::post('auth/google/callback', [RegisterController::class, 'handleGoogleCal
 
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
-
-
-    Route::get('all-users-hours/{month}', [API\UserHoursController::class, 'getAllUsersHours']);
+    // hours management
+    Route::post('set-totalhours', [API\UserHoursController::class, 'setTotalHours']);
+    Route::get('allusershours', [API\UserHoursController::class, 'getAllUsersHours']);
+    Route::get('hours-management/user/{userId}', [API\UserHoursController::class, 'getUserHours']);
 
     // timer
     Route::get('task-timer/status/{taskId}', [API\TaskTimerController::class, 'isTaskTimerRunning']);  // status check
@@ -52,7 +53,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
 
     Route::get('users/{user_id}/projects', [API\ProjectController::class, 'getUserProjectsWithTasks']);
     Route::get('customers_projects/{customer_id}', [API\CustomerController::class, 'getProjectsWithTasksByCustomer']);
-
 
     // task routes
     Route::get('tasks', [API\TaskController::class, 'index']);                
@@ -92,18 +92,18 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('permissions', [API\RoleController::class, 'create']);               
 
     // subscriptions routes
-    Route::get('/subscriptions', [API\SubscriptionController::class, 'index']);
-    Route::post('/subscriptions', [API\SubscriptionController::class, 'store']);
-    Route::get('/subscriptions/{id}', [API\SubscriptionController::class, 'show']);
-    Route::put('/subscriptions/{id}', [API\SubscriptionController::class, 'update']);
-    Route::delete('/subscriptions/{id}', [API\SubscriptionController::class, 'destroy']);
+    Route::get('subscriptions', [API\SubscriptionController::class, 'index']);
+    Route::post('subscriptions', [API\SubscriptionController::class, 'store']);
+    Route::get('subscriptions/{id}', [API\SubscriptionController::class, 'show']);
+    Route::put('subscriptions/{id}', [API\SubscriptionController::class, 'update']);
+    Route::delete('subscriptions/{id}', [API\SubscriptionController::class, 'destroy']);
 
     // customers routes
-    Route::get('/customers', [API\CustomerController::class, 'index']);        
-    Route::post('/customers', [API\CustomerController::class, 'store']);        
-    Route::get('/customers/{id}', [API\CustomerController::class, 'show']);     
-    Route::put('/customers/{id}', [API\CustomerController::class, 'update']);   
-    Route::delete('/customers/{id}', [API\CustomerController::class, 'destroy']); 
+    Route::get('customers', [API\CustomerController::class, 'index']);        
+    Route::post('customers', [API\CustomerController::class, 'store']);        
+    Route::get('customers/{id}', [API\CustomerController::class, 'show']);     
+    Route::put('customers/{id}', [API\CustomerController::class, 'update']);   
+    Route::delete('customers/{id}', [API\CustomerController::class, 'destroy']); 
 
     Route::post('/email/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();

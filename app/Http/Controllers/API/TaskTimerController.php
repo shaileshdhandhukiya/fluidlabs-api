@@ -5,39 +5,40 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\API\BaseController as BaseController;
 use Illuminate\Http\Request;
 use App\Models\TaskTimer;
+use App\Models\UserHoursManagement;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class TaskTimerController extends BaseController
 {
-    // Start Task Timer
+
     public function startTimer(Request $request)
     {
-        try {
-            // Validate the request input
-            $request->validate([
-                'task_id' => 'required|integer',
-                'assignees' => 'required|array',
-                'started_at' => 'required|date_format:Y-m-d H:i:s'
-            ]);
 
-            // Create a new TaskTimer
+        try {
+            
+            $request->validate([
+                'task_id' => 'required|exists:tasks,id',
+                'assignees' => 'required|array',
+                'started_at' => 'required|date_format:Y-m-d H:i:s',
+            ]);
+    
             $taskTimer = TaskTimer::create([
                 'task_id' => $request->task_id,
                 'assignees' => $request->assignees,
                 'started_at' => Carbon::parse($request->started_at),
                 'total_hours' => 0, // Default value
             ]);
-
+    
             return response()->json([
                 'success' => true,
                 'message' => 'Task timer started successfully',
                 'data' => $taskTimer,
                 'status' => 200
             ], 200);
-            
-        } catch (\Exception $e) {
+
+        } catch (\Throwable $e) {
 
             return response()->json([
                 'success' => false,
@@ -46,47 +47,104 @@ class TaskTimerController extends BaseController
                 'status' => 500
             ], 500);
         }
+       
     }
+
 
     // Stop Task Timer
-    public function stopTimer($id, Request $request)
+    // public function stopTimer($id, Request $request)
+    // {
+    //     try {
+    //         // Validate the stop time
+    //         $request->validate([
+    //             'stopped_at' => 'required|date_format:Y-m-d H:i:s'
+    //         ]);
+
+    //         // Find the task timer by ID
+    //         $taskTimer = TaskTimer::findOrFail($id);
+
+    //         // Calculate total hours
+    //         $startTime = Carbon::parse($taskTimer->started_at);
+    //         $stopTime = Carbon::parse($request->stopped_at);
+    //         $totalHours = $startTime->diffInHours($stopTime);
+
+    //         // Update the task timer
+    //         $taskTimer->update([
+    //             'stopped_at' => $stopTime,
+    //             'total_hours' => $totalHours
+    //         ]);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Task timer stopped successfully',
+    //             'data' => $taskTimer,
+    //             'status' => 200
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to stop task timer',
+    //             'error' => $e->getMessage(),
+    //             'status' => 500
+    //         ], 500);
+    //     }
+    // }
+
+    // Stop a timer for a task and update consumed hours
+    public function stopTimer(Request $request, $id)
     {
-        try {
-            // Validate the stop time
-            $request->validate([
-                'stopped_at' => 'required|date_format:Y-m-d H:i:s'
-            ]);
+        $request->validate([
+            'stopped_at' => 'required|date_format:Y-m-d H:i:s',
+        ]);
 
-            // Find the task timer by ID
-            $taskTimer = TaskTimer::findOrFail($id);
+        $taskTimer = TaskTimer::findOrFail($id);
 
-            // Calculate total hours
-            $startTime = Carbon::parse($taskTimer->started_at);
-            $stopTime = Carbon::parse($request->stopped_at);
-            $totalHours = $startTime->diffInHours($stopTime);
-
-            // Update the task timer
-            $taskTimer->update([
-                'stopped_at' => $stopTime,
-                'total_hours' => $totalHours
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Task timer stopped successfully',
-                'data' => $taskTimer,
-                'status' => 200
-            ], 200);
-        } catch (\Exception $e) {
+        if (!$taskTimer->started_at) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to stop task timer',
-                'error' => $e->getMessage(),
-                'status' => 500
-            ], 500);
+                'message' => 'Timer has not started yet.',
+            ], 400);
         }
+
+        // Calculate total hours worked
+        $startedAt = Carbon::parse($taskTimer->started_at);
+        $stoppedAt = Carbon::parse($request->stopped_at);
+        $totalHours = $stoppedAt->diffInHours($startedAt);
+
+        $taskTimer->update([
+            'stopped_at' => $request->stopped_at,
+            'total_hours' => $totalHours,
+        ]);
+
+        // Update consumed hours for each assignee
+        foreach ($taskTimer->assignees as $assigneeId) {
+            $this->updateConsumedHoursForAssignee($assigneeId, $totalHours);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task timer stopped and hours updated successfully',
+            'data' => $taskTimer,
+        ], 200);
     }
 
+    // Helper function to update consumed hours for each assignee
+    protected function updateConsumedHoursForAssignee($assigneeId, $hoursToAdd)
+    {
+        $currentMonth = Carbon::now()->format('Y-m');
+        
+        // Find or create user hours management entry for the current month
+        $userHours = UserHoursManagement::firstOrCreate(
+            ['user_id' => $assigneeId, 'month' => $currentMonth],
+            ['total_hours' => 160, 'consumed_hours' => 0] // Default to 160 total hours per month
+        );
+
+        // Add the hours to consumed hours
+        $userHours->consumed_hours += $hoursToAdd;
+        $userHours->save();
+    }
+
+    
     // get total time spend on tasks
     public function getAllTotalHours()
     {
@@ -97,7 +155,6 @@ class TaskTimerController extends BaseController
             // Prepare an empty collection to store total hours per assignee
             $totalHours = collect();
 
-            // Loop through each timer and its assignees
             foreach ($taskTimers as $timer) {
                 foreach ($timer->assignees as $assignee) {
                     // If the assignee already exists, sum their hours, otherwise set their initial hours
