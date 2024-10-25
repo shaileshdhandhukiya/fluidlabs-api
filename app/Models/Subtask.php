@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Task extends Model
+class Subtask extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'task_id',
         'subject',
         'start_date',
         'due_date',
@@ -22,17 +23,11 @@ class Task extends Model
     ];
 
     protected $casts = [
-        'assignees' => 'array', // Store assignees as array
+        'assignees' => 'array', 
     ];
 
-    public function project()
+    public function task()
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Task::class);
     }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
-    
 }
