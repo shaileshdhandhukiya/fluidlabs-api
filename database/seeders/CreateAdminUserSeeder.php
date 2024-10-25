@@ -15,11 +15,11 @@ class CreateAdminUserSeeder extends Seeder
     {
         // Create or find the admin user
         $user = User::firstOrCreate(
-            ['email' => 'admin@fluidlabs.co.uk'],
+            ['email' => 'wp@fluidlabs.co.uk'],
             [
                 'first_name' => 'Admin',
                 'last_name' => 'FluidlabsUK',
-                'password' => bcrypt('12345678'),
+                'password' => bcrypt('123456789012'),
                 'email_verified_at' => now(),
             ]
         );

@@ -11,6 +11,15 @@ use App\Models\Task;
 
 class SubTaskController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('permission:task-list|task-create|task-edit|task-delete', ['only' => ['index', 'store']]);
+        $this->middleware('permission:task-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:task-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:task-delete', ['only' => ['destroy']]);
+    }
+    
     public function index($taskId)
     {
         $subtasks = Subtask::with('tasks')->where('task_id', $taskId)->get();
