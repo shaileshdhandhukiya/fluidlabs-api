@@ -58,7 +58,7 @@ class ProjectController extends BaseController
             'deadline' => 'nullable|date',
             'description' => 'nullable|string',
             'send_project_created_email' => 'nullable|boolean',
-            'project_files.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000',
+            'project_files.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000',
         ]);
 
         if ($validator->fails()) {
@@ -153,7 +153,7 @@ class ProjectController extends BaseController
             'deadline' => 'nullable|date',
             'description' => 'nullable|string',
             'send_project_created_email' => 'nullable|boolean',
-            'project_files.*' => 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000', // Validate multiple attachments
+            'project_files.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:500000000', // Validate multiple attachments
         ]);
 
         if ($validator->fails()) {

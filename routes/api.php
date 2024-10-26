@@ -37,7 +37,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::post('task-timer/stop/{id}', [API\TaskTimerController::class, 'stopTimer']);   // Stop timer for a task
     Route::get('task-timer/total-hours', [API\TaskTimerController::class, 'getAllTotalHours']);  // Get total hours for all assignees
     Route::get('task-timer/{id}', [API\TaskTimerController::class, 'getTaskTimer']);   // Get task timer details by ID
-    Route::post('task-timer/{id}/update-manually', [API\TaskTimerController::class, 'updateTimerManually']);
+    Route::post('task-timer/{timer_id}/update-manually', [API\TaskTimerController::class, 'updateTimerManually']);
 
     // dashboard Analytics
     Route::get('dashboard/analytics', [API\DashboardController::class, 'index']);
@@ -63,11 +63,11 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::delete('tasks/{id}', [API\TaskController::class, 'destroy']);
 
     // Sub-task routes
-    Route::get('tasks/{task_id}/subtasks', [API\SubtaskController::class, 'index']);
-    Route::post('tasks/{task_id}/subtasks', [API\SubtaskController::class, 'store']);
-    Route::get('tasks/{task_id}/subtasks/{subtask_id}', [API\SubtaskController::class, 'show']);
-    Route::put('tasks/{task_id}/subtasks/{subtask_id}', [API\SubtaskController::class, 'update']);
-    Route::delete('tasks/{task_id}/subtasks/{subtask_id}', [API\SubtaskController::class, 'destroy']);
+    Route::get('tasks/{task_id}/subtasks', [API\SubTaskController::class, 'index']);
+    Route::post('tasks/{task_id}/subtasks', [API\SubTaskController::class, 'store']);
+    Route::get('tasks/{task_id}/subtasks/{subtask_id}', [API\SubTaskController::class, 'show']);
+    Route::put('tasks/{task_id}/subtasks/{subtask_id}', [API\SubTaskController::class, 'update']);
+    Route::delete('tasks/{task_id}/subtasks/{subtask_id}', [API\SubTaskController::class, 'destroy']);
 
     // comments routes
     Route::get('tasks/{task_id}/comments', [API\CommentController::class, 'index']);

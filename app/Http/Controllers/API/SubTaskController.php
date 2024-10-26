@@ -22,7 +22,7 @@ class SubTaskController extends BaseController
     
     public function index($taskId)
     {
-        $subtasks = Subtask::with('tasks')->where('task_id', $taskId)->get();
+        $subtasks = Subtask::with('task')->where('task_id', $taskId)->get();
 
         return response()->json([
             'success' => true,
