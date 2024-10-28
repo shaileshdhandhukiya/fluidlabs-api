@@ -37,7 +37,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::post('task-timer/stop/{id}', [API\TaskTimerController::class, 'stopTimer']);   // Stop timer for a task
     Route::get('task-timer/total-hours', [API\TaskTimerController::class, 'getAllTotalHours']);  // Get total hours for all assignees
     Route::get('task-timer/{id}', [API\TaskTimerController::class, 'getTaskTimer']);   // Get task timer details by ID
-    Route::post('task-timer/{timer_id}/update-manually', [API\TaskTimerController::class, 'updateTimerManually']);
+    Route::post('task-timer/update-timer/{id?}', [API\TaskTimerController::class, 'updateOrCreateTimerManually']);
 
     // dashboard Analytics
     Route::get('dashboard/analytics', [API\DashboardController::class, 'index']);

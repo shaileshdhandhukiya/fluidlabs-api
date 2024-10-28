@@ -37,7 +37,6 @@ class TaskTimerController extends BaseController
                 'data' => $taskTimer,
                 'status' => 200
             ], 200);
-            
         } catch (\Throwable $e) {
 
             return response()->json([
@@ -217,7 +216,8 @@ class TaskTimerController extends BaseController
                     'data' => [
                         'timer_id' => $timer->id,  // Include the timer ID
                         'task_id' => $taskId,
-                        'started_at' => $timer->started_at
+                        'started_at' => $timer->started_at,
+                        'nexttimer_id' => $timer->id + 1,
                     ],
                     'status' => 200,
                 ], 200);
@@ -226,6 +226,7 @@ class TaskTimerController extends BaseController
                 return response()->json([
                     'success' => false,
                     'message' => 'Task timer is not running',
+                    'nexttimer_id' => $timer->id + 1,
                     'status' => 200,
                 ], 200);
             }
@@ -240,40 +241,84 @@ class TaskTimerController extends BaseController
         }
     }
 
-    public function updateTimerManually(Request $request, $id)
+    /**
+     * Update or create a task timer manually.
+     *
+     * This method handles the creation of a new task timer or the update of an existing one.
+     * It validates the input data, processes the timer information, and updates the associated task and assignees.
+     *
+     * @param \Illuminate\Http\Request $request The HTTP request containing the timer data
+     * @param int|null $id The ID of the timer to update (null for creating a new timer)
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating the result of the operation
+     *
+     * @throws \Illuminate\Validation\ValidationException If the input data fails validation
+     * @throws \Exception If an error occurs during the timer creation/update process
+     */
+    public function updateOrCreateTimerManually(Request $request, ?int $id = null)
     {
-        $request->validate([
+        // Validate request data
+        $validatedData = $this->validate($request, [
+            'task_id' => 'required|exists:tasks,id',
+            'assignees' => 'required|array',
             'started_at' => 'nullable|date_format:Y-m-d H:i:s',
             'stopped_at' => 'nullable|date_format:Y-m-d H:i:s',
-            'total_time' => 'nullable|regex:/^\d{2}:\d{2}$/',  // Accept "HH:MM" format
+            'total_time' => 'nullable|regex:/^\d{2}:\d{2}$/',
         ]);
 
-        $taskTimer = TaskTimer::findOrFail($id);
+        try {
+            // Find an existing timer or create a new instance
+            $taskTimer = TaskTimer::findOrNew($id);
+            $taskTimer->task_id = $validatedData['task_id'];
+            $taskTimer->started_at = $validatedData['started_at'] ? Carbon::parse($validatedData['started_at']) : null;
+            $taskTimer->stopped_at = $validatedData['stopped_at'] ? Carbon::parse($validatedData['stopped_at']) : null;
 
-        if ($request->has('started_at')) {
-            $taskTimer->started_at = Carbon::parse($request->started_at);
+            // Update or create the assignees
+            $taskTimer->assignees = $validatedData['assignees'];
+
+            // Calculate total hours if provided, or recalculate if both start and stop times are available
+            if (isset($validatedData['total_time'])) {
+                $taskTimer->total_hours = $validatedData['total_time'];
+            } elseif ($taskTimer->started_at && $taskTimer->stopped_at) {
+                $totalMinutes = $taskTimer->stopped_at->diffInMinutes($taskTimer->started_at);
+                $taskTimer->total_hours = sprintf('%02d:%02d', $totalMinutes / 60, $totalMinutes % 60);
+            }
+
+            // Save the timer
+            $taskTimer->save();
+
+            // Update consumed time for each assignee if both started_at and stopped_at are provided
+            if ($taskTimer->started_at && $taskTimer->stopped_at) {
+                $this->updateConsumedHoursForAssignees($taskTimer->assignees, $taskTimer->started_at, $taskTimer->stopped_at);
+            }
+
+            $message = $taskTimer->wasRecentlyCreated ? 'Timer created manually' : 'Timer updated manually';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $taskTimer,
+                'status' => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            // Handle any exceptions that may occur
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while processing your request.',
+                'error' => $e->getMessage(),
+                'status' => 500,
+            ], 500);
         }
+    }
 
-        if ($request->has('stopped_at')) {
-            $taskTimer->stopped_at = Carbon::parse($request->stopped_at);
+
+    // Helper function to update consumed hours for each assignee
+    protected function updateConsumedHoursForAssignees(array $assignees, Carbon $startedAt, Carbon $stoppedAt)
+    {
+        // Calculate total minutes worked
+        $totalMinutes = $stoppedAt->diffInMinutes($startedAt);
+
+        foreach ($assignees as $assigneeId) {
+            $this->updateConsumedHoursForAssignee($assigneeId, $totalMinutes);
         }
-
-        if ($request->has('total_time')) {
-            $taskTimer->total_hours = $request->total_time;
-        } else if ($taskTimer->started_at && $taskTimer->stopped_at) {
-            // Recalculate if times are provided
-            $totalMinutes = $taskTimer->stopped_at->diffInMinutes($taskTimer->started_at);
-            $hours = intdiv($totalMinutes, 60);
-            $minutes = $totalMinutes % 60;
-            $taskTimer->total_hours = sprintf('%02d:%02d', $hours, $minutes);
-        }
-
-        $taskTimer->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Timer updated manually',
-            'data' => $taskTimer,
-        ], 200);
     }
 }
