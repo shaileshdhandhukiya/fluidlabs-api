@@ -55,6 +55,7 @@ class TaskController extends BaseController
             'task_description' => 'nullable|string',
             'status' => 'required|in:not started,in progress,testing,awaiting feedback,completed',
             'attach_file' => 'nullable|file|mimes:jpg,png,pdf,doc,docx',
+            'estimation_hours' => 'nullable|string', // New field added
         ]);
 
         if ($validator->fails()) {
@@ -72,7 +73,7 @@ class TaskController extends BaseController
         if ($request->hasFile('attach_file')) {
             $originalName = $request->file('attach_file')->getClientOriginalName();
             $filePath = $request->file('attach_file')->storeAs('uploads/task_files', $originalName, 'public');
-            $taskData['attach_file'] = $filePath; // Save the file path with the original name
+            $taskData['attach_file'] = $filePath;
         }
 
         $task = Task::create($taskData);
@@ -134,6 +135,7 @@ class TaskController extends BaseController
             'task_description' => 'nullable|string',
             'status' => 'required|in:not started,in progress,testing,awaiting feedback,completed',
             'attach_file' => 'nullable|file|mimes:jpg,png,pdf,doc,docx',
+            'estimation_hours' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -150,7 +152,7 @@ class TaskController extends BaseController
         if ($request->hasFile('attach_file')) {
             $originalName = $request->file('attach_file')->getClientOriginalName();
             $filePath = $request->file('attach_file')->storeAs('uploads/task_files', $originalName, 'public');
-            $taskData['attach_file'] = $filePath; 
+            $taskData['attach_file'] = $filePath;
         }
 
         $task->update($taskData);
@@ -187,5 +189,4 @@ class TaskController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
-
 }

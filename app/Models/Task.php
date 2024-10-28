@@ -19,6 +19,7 @@ class Task extends Model
         'task_description',
         'status',
         'attach_file',
+        'estimation_hours'
     ];
 
     protected $casts = [

@@ -28,7 +28,7 @@ class TaskTimerController extends BaseController
                 'task_id' => $request->task_id,
                 'assignees' => $request->assignees,
                 'started_at' => Carbon::parse($request->started_at),
-                'total_hours' => 0, // Default value
+                'total_hours' => '0:00', // Default value
             ]);
 
             return response()->json([
@@ -37,6 +37,7 @@ class TaskTimerController extends BaseController
                 'data' => $taskTimer,
                 'status' => 200
             ], 200);
+            
         } catch (\Throwable $e) {
 
             return response()->json([
@@ -64,19 +65,24 @@ class TaskTimerController extends BaseController
             ], 400);
         }
 
-        // Calculate total hours worked
+        // Calculate total time worked in hours and minutes
         $startedAt = Carbon::parse($taskTimer->started_at);
         $stoppedAt = Carbon::parse($request->stopped_at);
-        $totalHours = $stoppedAt->diffInHours($startedAt);
+        $totalMinutes = $stoppedAt->diffInMinutes($startedAt);
+
+        // Convert minutes to hours and minutes format
+        $hours = intdiv($totalMinutes, 60);
+        $minutes = $totalMinutes % 60;
+        $formattedTime = sprintf('%02d:%02d', $hours, $minutes);
 
         $taskTimer->update([
             'stopped_at' => $request->stopped_at,
-            'total_hours' => $totalHours,
+            'total_hours' => $formattedTime,  // Store formatted time as "HH:MM"
         ]);
 
-        // Update consumed hours for each assignee
+        // Update consumed time for each assignee
         foreach ($taskTimer->assignees as $assigneeId) {
-            $this->updateConsumedHoursForAssignee($assigneeId, $totalHours);
+            $this->updateConsumedHoursForAssignee($assigneeId, $totalMinutes);
         }
 
         return response()->json([
@@ -87,47 +93,77 @@ class TaskTimerController extends BaseController
     }
 
     // Helper function to update consumed hours for each assignee
-    protected function updateConsumedHoursForAssignee($assigneeId, $hoursToAdd)
+    protected function updateConsumedHoursForAssignee($assigneeId, $minutesToAdd)
     {
         $currentMonth = Carbon::now()->format('Y-m');
 
         // Find or create user hours management entry for the current month
         $userHours = UserHoursManagement::firstOrCreate(
             ['user_id' => $assigneeId, 'month' => $currentMonth],
-            ['total_hours' => 160, 'consumed_hours' => 0] // Default to 160 total hours per month
+            ['total_hours' => '160:00', 'consumed_hours' => '00:00'] // Default to 160 hours and 0 consumed
         );
 
-        // Add the hours to consumed hours
-        $userHours->consumed_hours += $hoursToAdd;
+        // Convert consumed hours to minutes
+        if (strpos($userHours->consumed_hours, ':') !== false) {
+            [$hours, $minutes] = explode(':', $userHours->consumed_hours);
+            $currentConsumedMinutes = ($hours * 60) + $minutes;
+        } else {
+            $currentConsumedMinutes = 0; // Set to zero if no valid time is found
+        }
+
+        // Calculate the new total consumed minutes
+        $newTotalMinutes = $currentConsumedMinutes + $minutesToAdd;
+
+        // Convert back to "HH:MM" format
+        $updatedHours = intdiv($newTotalMinutes, 60);
+        $updatedMinutes = $newTotalMinutes % 60;
+        $formattedConsumedTime = sprintf('%02d:%02d', $updatedHours, $updatedMinutes);
+
+        // Update the consumed_hours field with the new value
+        $userHours->consumed_hours = $formattedConsumedTime;
         $userHours->save();
     }
 
-
-    // get total time spend on tasks
     public function getAllTotalHours()
     {
         try {
             // Fetch all task timers
             $taskTimers = TaskTimer::all();
 
-            // Prepare an empty collection to store total hours per assignee
-            $totalHours = collect();
+            // Prepare an empty collection to store total minutes per assignee
+            $totalMinutesPerAssignee = collect();
 
             foreach ($taskTimers as $timer) {
                 foreach ($timer->assignees as $assignee) {
-                    // If the assignee already exists, sum their hours, otherwise set their initial hours
-                    if ($totalHours->has($assignee)) {
-                        $totalHours[$assignee] += $timer->total_hours;
+                    // Check if total_hours is set and in the correct "HH:MM" format
+                    if ($timer->total_hours && strpos($timer->total_hours, ':') !== false) {
+                        [$hours, $minutes] = explode(':', $timer->total_hours);
+                        $timerMinutes = ($hours * 60) + $minutes;
                     } else {
-                        $totalHours[$assignee] = $timer->total_hours;
+                        // If total_hours is invalid, treat it as 0 minutes
+                        $timerMinutes = 0;
+                    }
+
+                    // If the assignee already exists, add their minutes; otherwise, initialize with current minutes
+                    if ($totalMinutesPerAssignee->has($assignee)) {
+                        $totalMinutesPerAssignee[$assignee] += $timerMinutes;
+                    } else {
+                        $totalMinutesPerAssignee[$assignee] = $timerMinutes;
                     }
                 }
             }
 
+            // Convert total minutes back to "HH:MM" format
+            $totalHoursPerAssignee = $totalMinutesPerAssignee->map(function ($totalMinutes) {
+                $hours = intdiv($totalMinutes, 60);
+                $minutes = $totalMinutes % 60;
+                return sprintf('%02d:%02d', $hours, $minutes);
+            });
+
             return response()->json([
                 'success' => true,
                 'message' => 'Total hours retrieved successfully',
-                'data' => $totalHours,
+                'data' => $totalHoursPerAssignee,
                 'status' => 200,
             ], 200);
         } catch (\Exception $e) {
@@ -139,6 +175,7 @@ class TaskTimerController extends BaseController
             ], 500);
         }
     }
+
 
     // Get Task Timer Details by ID
     public function getTaskTimer($id)
@@ -208,7 +245,7 @@ class TaskTimerController extends BaseController
         $request->validate([
             'started_at' => 'nullable|date_format:Y-m-d H:i:s',
             'stopped_at' => 'nullable|date_format:Y-m-d H:i:s',
-            'total_hours' => 'nullable|numeric|min:0'
+            'total_time' => 'nullable|regex:/^\d{2}:\d{2}$/',  // Accept "HH:MM" format
         ]);
 
         $taskTimer = TaskTimer::findOrFail($id);
@@ -219,13 +256,16 @@ class TaskTimerController extends BaseController
 
         if ($request->has('stopped_at')) {
             $taskTimer->stopped_at = Carbon::parse($request->stopped_at);
-            if ($taskTimer->started_at) {
-                $taskTimer->total_hours = Carbon::parse($taskTimer->stopped_at)->diffInHours($taskTimer->started_at);
-            }
         }
 
-        if ($request->has('total_hours')) {
-            $taskTimer->total_hours = $request->total_hours;
+        if ($request->has('total_time')) {
+            $taskTimer->total_hours = $request->total_time;
+        } else if ($taskTimer->started_at && $taskTimer->stopped_at) {
+            // Recalculate if times are provided
+            $totalMinutes = $taskTimer->stopped_at->diffInMinutes($taskTimer->started_at);
+            $hours = intdiv($totalMinutes, 60);
+            $minutes = $totalMinutes % 60;
+            $taskTimer->total_hours = sprintf('%02d:%02d', $hours, $minutes);
         }
 
         $taskTimer->save();
