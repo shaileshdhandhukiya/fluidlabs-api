@@ -48,22 +48,26 @@ class UserHoursController extends BaseController
             $currentMonth = Carbon::now()->format('Y-m');
             $users = User::where('id', '!=', 1)->get(); // Skip user_id = 1
             $allUsersHours = [];
-
+    
             foreach ($users as $user) {
                 // Get the total available hours for the current month (default to 160 if not found)
                 $userHoursManagement = UserHoursManagement::where('user_id', $user->id)
                     ->where('month', $currentMonth)
                     ->first();
-
-                $totalAvailableHours = $userHoursManagement->total_hours ?? 160;
-
-                // Sum up consumed hours from TaskTimer table
-                $consumedHours = $userHoursManagement->consumed_hours ?? 0;
-
+    
+                $totalAvailableHours = is_numeric($userHoursManagement->total_hours ?? null) 
+                    ? (int) $userHoursManagement->total_hours 
+                    : 160;
+    
+                // Sum up consumed hours from TaskTimer table, default to 0 if non-numeric
+                $consumedHours = is_numeric($userHoursManagement->consumed_hours ?? null) 
+                    ? (int) $userHoursManagement->consumed_hours 
+                    : 0;
+    
                 // Calculate remaining and overtime hours
                 $remainingHours = max(0, $totalAvailableHours - $consumedHours);
                 $overtimeHours = max(0, $consumedHours - $totalAvailableHours);
-
+    
                 // Add user data to the response array
                 $allUsersHours[] = [
                     'user_id' => $user->id,
@@ -73,7 +77,7 @@ class UserHoursController extends BaseController
                     'remaining_hours' => $remainingHours,
                     'overtime_hours' => $overtimeHours
                 ];
-
+    
                 // Optionally, update the user hours management table
                 if ($userHoursManagement) {
                     $userHoursManagement->update([
@@ -89,12 +93,13 @@ class UserHoursController extends BaseController
                     ]);
                 }
             }
-
+    
             return response()->json([
                 'success' => true,
                 'message' => 'All users hours retrieved successfully',
                 'data' => $allUsersHours,
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -104,7 +109,6 @@ class UserHoursController extends BaseController
             ], 500);
         }
     }
-
 
     public function getUserHours($userId)
     {

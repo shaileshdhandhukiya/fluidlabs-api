@@ -41,4 +41,13 @@ class UserHoursManagement extends Model
         return $overtime > 0 ? $overtime : 0;
     }
 
+    public function getTotalHoursAttribute($value)
+    {
+        return $value ?: '160:00';
+    }
+
+    public function getConsumedHoursAttribute($value)
+    {
+        return $value ?: '00:00';
+    }
 }
