@@ -75,9 +75,10 @@ class RegisterController extends BaseController
             $success["first_name"] = $user->first_name;
             $success["last_name"] = $user->last_name;
             $success["email"] = $user->email;
-            $success["role"] = $user->role;
             $success["user_id"] = $user->id;
 
+            $success["role"] = $user->getRoleNames()->toArray();
+            
             return response()->json([
                 'success' => true,
                 'data' => $success,
@@ -137,9 +138,10 @@ class RegisterController extends BaseController
                 "first_name" => $user->first_name,
                 "last_name" => $user->last_name,
                 "email" => $user->email,
-                "role" => $user->role,
                 "user_id" => $user->id,
             ];
+
+            $success["role"] = $user->getRoleNames()->toArray();
 
             return response()->json([
                 'success' => true,
