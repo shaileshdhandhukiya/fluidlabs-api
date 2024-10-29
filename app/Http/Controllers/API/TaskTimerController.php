@@ -35,7 +35,6 @@ class TaskTimerController extends BaseController
                 'data' => $taskTimer,
                 'status' => 200
             ], 200);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -185,7 +184,6 @@ class TaskTimerController extends BaseController
                 ->first();
 
             if ($timer) {
-
                 return response()->json([
                     'success' => true,
                     'message' => 'Task timer is running',
@@ -197,26 +195,21 @@ class TaskTimerController extends BaseController
                     ],
                     'status' => 200,
                 ], 200);
-
             } else {
-
                 return response()->json([
                     'success' => false,
                     'message' => 'Task timer is not running',
-                    'nexttimer_id' => $timer->id + 1,
+                    'nexttimer_id' => null,
                     'status' => 200,
                 ], 200);
-                
             }
         } catch (\Exception $e) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to check task timer status',
                 'error' => $e->getMessage(),
                 'status' => 500,
             ], 500);
-
         }
     }
 
@@ -240,7 +233,7 @@ class TaskTimerController extends BaseController
             'assignees' => 'required|array',
             'started_at' => 'nullable|date_format:Y-m-d H:i:s',
             'stopped_at' => 'nullable|date_format:Y-m-d H:i:s',
-            'total_time' => 'nullable|regex:/^\d{2}:\d{2}$/',
+            'total_time' => 'nullable|regex:/^\d{2}:\d{2}$/', // HH:MM
         ]);
 
         try {
@@ -261,8 +254,8 @@ class TaskTimerController extends BaseController
 
             if ($taskTimer->started_at && $taskTimer->stopped_at) {
                 $this->updateConsumedHoursForAssignees(
-                    $taskTimer->assignees, 
-                    $taskTimer->started_at, 
+                    $taskTimer->assignees,
+                    $taskTimer->started_at,
                     $taskTimer->stopped_at
                 );
             }
@@ -273,7 +266,6 @@ class TaskTimerController extends BaseController
                 'data' => $taskTimer,
                 'status' => 200,
             ], 200);
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -282,7 +274,6 @@ class TaskTimerController extends BaseController
                 'error' => $e->getMessage(),
                 'status' => 500,
             ], 500);
-            
         }
     }
 
