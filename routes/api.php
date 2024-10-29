@@ -61,6 +61,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('tasks/{id}', [API\TaskController::class, 'show']);          
     Route::put('tasks/{id}', [API\TaskController::class, 'update']);        
     Route::delete('tasks/{id}', [API\TaskController::class, 'destroy']);
+    Route::get('users-tasks/{user_id}', [API\TaskController::class, 'getTasksByAssignee']);       
 
     // Sub-task routes
     Route::get('tasks/{task_id}/subtasks', [API\SubTaskController::class, 'index']);
@@ -82,7 +83,8 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('users/{id}', [API\UserController::class, 'show']);                  
     Route::put('users/{id}', [API\UserController::class, 'update']);                
     Route::delete('users/{id}', [API\UserController::class, 'destroy']);   
-    Route::get('users-create', [API\UserController::class, 'create']);          
+    Route::get('users-create', [API\UserController::class, 'create']);   
+     
 
     // roles routes
     Route::get('roles', [API\RoleController::class, 'index']);                      

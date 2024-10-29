@@ -189,4 +189,46 @@ class TaskController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
+    /**
+     * Get tasks associated with the given user ID.
+     */
+    public function getTasksByAssignee($user_id)
+    {
+        try {
+            
+            // Validate the user ID
+            if (!is_numeric($user_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid user ID',
+                    'status' => 400,
+                ], 400);
+            }
+
+            $tasks = Task::whereJsonContains('assignees', (string) $user_id)->get();
+
+            if ($tasks->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tasks found for the given user ID',
+                    'status' => 404,
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $tasks,
+                'message' => 'Tasks retrieved successfully',
+                'status' => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving tasks',
+                'error' => $e->getMessage(),
+                'status' => 500,
+            ], 500);
+        }
+    }
 }
