@@ -169,6 +169,20 @@ class ProjectController extends BaseController
         $projectData = $validator->validated();
         $project->update($projectData);
 
+        // Calculate the project progress based on task completion
+        $tasks = $project->tasks;
+        $totalTasks = $tasks->count();
+        $completedTasks = $tasks->where('status', 'completed')->count(); // Adjust based on your status naming
+
+        // Calculate progress percentage
+        if ($totalTasks > 0) {
+            $progressPercentage = ($completedTasks / $totalTasks) * 100;
+            $project->progress = round($progressPercentage); // Round to the nearest integer
+        } else {
+            $project->progress = 0; // If there are no tasks, set progress to 0
+        }
+
+        // Handle project files upload
         $filePaths = [];
         if ($request->hasFile('project_files')) {
             foreach ($request->file('project_files') as $file) {
@@ -192,6 +206,7 @@ class ProjectController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
 
 
     /**

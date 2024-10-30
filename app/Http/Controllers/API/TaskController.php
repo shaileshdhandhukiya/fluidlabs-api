@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\API\BaseController as BaseController;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Models\Project;
 use Illuminate\Support\Facades\Validator;
 
 class TaskController extends BaseController
@@ -155,7 +156,11 @@ class TaskController extends BaseController
             $taskData['attach_file'] = $filePath;
         }
 
+        // Update the task
         $task->update($taskData);
+
+        // Update project progress based on the task's project ID
+        $this->updateProjectProgress($task->project_id);
 
         return response()->json([
             'success' => true,
@@ -164,6 +169,33 @@ class TaskController extends BaseController
             'status' => 200,
         ], 200); // HTTP 200 OK
     }
+
+    /**
+     * Update the progress of the project based on its tasks' completion.
+     */
+    protected function updateProjectProgress($projectId)
+    {
+        $project = Project::find($projectId);
+
+        if (!$project) {
+            return; // If the project doesn't exist, just return.
+        }
+
+        $tasks = $project->tasks;
+        $totalTasks = $tasks->count();
+        $completedTasks = $tasks->where('status', 'completed')->count(); // Adjust based on your status naming
+
+        // Calculate progress percentage
+        if ($totalTasks > 0) {
+            $progressPercentage = ($completedTasks / $totalTasks) * 100;
+            $project->progress = round($progressPercentage); // Round to the nearest integer
+        } else {
+            $project->progress = 0; // If there are no tasks, set progress to 0
+        }
+
+        $project->save(); // Save the updated progress
+    }
+
 
 
     /**
@@ -196,7 +228,7 @@ class TaskController extends BaseController
     public function getTasksByAssignee($user_id)
     {
         try {
-            
+
             // Validate the user ID
             if (!is_numeric($user_id)) {
                 return response()->json([
