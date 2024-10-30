@@ -48,26 +48,30 @@ class UserHoursController extends BaseController
             $currentMonth = Carbon::now()->format('Y-m');
             $users = User::where('id', '!=', 1)->get(); // Skip user_id = 1
             $allUsersHours = [];
-    
+
             foreach ($users as $user) {
-                // Get the total available hours for the current month (default to 160 if not found)
+                // Get the user hours management record for the current month
                 $userHoursManagement = UserHoursManagement::where('user_id', $user->id)
                     ->where('month', $currentMonth)
                     ->first();
-    
-                $totalAvailableHours = is_numeric($userHoursManagement->total_hours ?? null) 
-                    ? (int) $userHoursManagement->total_hours 
-                    : 160;
-    
-                // Sum up consumed hours from TaskTimer table, default to 0 if non-numeric
-                $consumedHours = is_numeric($userHoursManagement->consumed_hours ?? null) 
-                    ? (int) $userHoursManagement->consumed_hours 
-                    : 0;
-    
-                // Calculate remaining and overtime hours
-                $remainingHours = max(0, $totalAvailableHours - $consumedHours);
-                $overtimeHours = max(0, $consumedHours - $totalAvailableHours);
-    
+
+                // Get total hours (default to 160:00 if not found)
+                $totalAvailableHours = isset($userHoursManagement) ? $userHoursManagement->total_hours : '160:00';
+                // Get consumed hours (default to 0:00 if not found)
+                $consumedHours = isset($userHoursManagement) ? $userHoursManagement->consumed_hours : '0:00';
+
+                // Convert HH:MM to total minutes for calculations
+                $totalAvailableMinutes = $this->convertToMinutes($totalAvailableHours);
+                $consumedMinutes = $this->convertToMinutes($consumedHours);
+
+                // Calculate remaining and overtime hours in minutes
+                $remainingMinutes = max(0, $totalAvailableMinutes - $consumedMinutes);
+                $overtimeMinutes = max(0, $consumedMinutes - $totalAvailableMinutes);
+
+                // Convert back to HH:MM format
+                $remainingHours = $this->convertToHHMM($remainingMinutes);
+                $overtimeHours = $this->convertToHHMM($overtimeMinutes);
+
                 // Add user data to the response array
                 $allUsersHours[] = [
                     'user_id' => $user->id,
@@ -77,29 +81,13 @@ class UserHoursController extends BaseController
                     'remaining_hours' => $remainingHours,
                     'overtime_hours' => $overtimeHours
                 ];
-    
-                // Optionally, update the user hours management table
-                if ($userHoursManagement) {
-                    $userHoursManagement->update([
-                        'consumed_hours' => $consumedHours,
-                    ]);
-                } else {
-                    // If no record exists for the user in the current month, create one
-                    UserHoursManagement::create([
-                        'user_id' => $user->id,
-                        'month' => $currentMonth,
-                        'total_hours' => $totalAvailableHours,
-                        'consumed_hours' => $consumedHours,
-                    ]);
-                }
             }
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'All users hours retrieved successfully',
                 'data' => $allUsersHours,
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -109,6 +97,23 @@ class UserHoursController extends BaseController
             ], 500);
         }
     }
+
+    // Convert HH:MM to total minutes
+    private function convertToMinutes($time)
+    {
+        list($hours, $minutes) = explode(':', $time);
+        return ($hours * 60) + $minutes;
+    }
+
+    // Convert total minutes back to HH:MM format
+    private function convertToHHMM($minutes)
+    {
+        $hours = floor($minutes / 60);
+        $remainingMinutes = $minutes % 60;
+        return sprintf('%02d:%02d', $hours, $remainingMinutes);
+    }
+
+
 
     public function getUserHours($userId)
     {

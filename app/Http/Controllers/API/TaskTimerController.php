@@ -166,12 +166,15 @@ class TaskTimerController extends BaseController
                 'data' => $taskTimer,
                 'status' => 200
             ], 200);
+
         } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Task timer not found',
                 'status' => 404
             ], 404);
+            
         }
     }
 
