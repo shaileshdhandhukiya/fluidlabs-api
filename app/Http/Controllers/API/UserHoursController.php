@@ -101,8 +101,21 @@ class UserHoursController extends BaseController
     // Convert HH:MM to total minutes
     private function convertToMinutes($time)
     {
-        list($hours, $minutes) = explode(':', $time);
-        return ($hours * 60) + $minutes;
+
+        // Check if the time is in HH:MM format
+        if (preg_match('/^(\d{1,2}):(\d{2})$/', $time, $matches)) {
+            list($hours, $minutes) = array_slice($matches, 1);
+            return ($hours * 60) + $minutes;
+        }
+
+        // Check if the time is in H:MM format
+        if (preg_match('/^(\d{1}):(\d{2})$/', $time, $matches)) {
+            list($hours, $minutes) = array_slice($matches, 1);
+            return ($hours * 60) + $minutes;
+        }
+
+        // If the format is not correct, return 0 minutes
+        return 0;
     }
 
     // Convert total minutes back to HH:MM format
@@ -112,8 +125,6 @@ class UserHoursController extends BaseController
         $remainingMinutes = $minutes % 60;
         return sprintf('%02d:%02d', $hours, $remainingMinutes);
     }
-
-
 
     public function getUserHours($userId)
     {
