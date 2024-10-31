@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\PasswordResetController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -108,21 +109,24 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::put('customers/{id}', [API\CustomerController::class, 'update']);   
     Route::delete('customers/{id}', [API\CustomerController::class, 'destroy']); 
 
-    Route::post('/email/resend', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
-        return response()->json(['message' => 'Verification email resent']);
-    });
+    // Route::post('/email/resend', function (Request $request) {
+    //     $request->user()->sendEmailVerificationNotification();
+    //     return response()->json(['message' => 'Verification email resent']);
+    // });
 
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $request->fulfill();
-        return response()->json(['message' => 'Email verified successfully']);
-    })->middleware(['auth:api', 'signed'])->name('verification.verify');
+    // Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    //     $request->fulfill();
+    //     return response()->json(['message' => 'Email verified successfully']);
+    // })->middleware(['auth:api', 'signed'])->name('verification.verify');
 
-    Route::get('/password/reset/{token}', function ($token) {
-        return response()->json(['token' => $token]);
-    })->name('password.reset');
+    Route::post('send-otp', [API\AuthController::class, 'sendOtp']);
+    Route::post('verify-otp', [API\AuthController::class, 'verifyOtp']);    
 
-    Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
-    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
+    // Route::get('/password/reset/{token}', function ($token) {
+    //     return response()->json(['token' => $token]);
+    // })->name('password.reset');
+
+    // Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
+    // Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
 
 });
