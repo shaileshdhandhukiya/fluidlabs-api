@@ -30,7 +30,7 @@ class PasswordResetController extends BaseController
         return $status === Password::RESET_LINK_SENT
 
             ? response()->json([
-                'success' => true,
+                'success' => true,             
                 'message' => 'Reset link sent to your email.',
                 'status' => 200
             ], 200) : response()->json([
