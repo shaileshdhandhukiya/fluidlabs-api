@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\CustomResetPassword;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
+
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -61,4 +64,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Task::class);
     }
+
+    public function sendPasswordResetNotification($token)
+    {
+        // Generate a reset link with the token
+        $url = config('app.frontend_url') . '/password-reset?token=' . $token . '&email=' . urlencode($this->email);
+        
+        // Notify the user with the custom reset password notification
+        $this->notify(new CustomResetPassword($url)); // Ensure you have a CustomResetPassword notification
+    }
+    
 }
