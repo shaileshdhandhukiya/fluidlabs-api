@@ -24,6 +24,10 @@ Route::post('login', [RegisterController::class, 'login'])->name('login');
 Route::get('auth/google', [RegisterController::class, 'redirectToGoogle']);
 Route::post('auth/google/callback', [RegisterController::class, 'handleGoogleCallback']);
 
+//password reset
+Route::post('password-forgot', [PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('password-reset', [PasswordResetController::class, 'passwordReset']);
+
 Route::middleware(['auth:api', 'verified'])->group(function () {
 
     // hours management
@@ -112,7 +116,5 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::post('send-otp', [API\AuthController::class, 'sendOtp']);
     Route::post('verify-otp', [API\AuthController::class, 'verifyOtp']);    
 
-    //password reset
-    Route::post('password-forgot', [PasswordResetController::class, 'sendResetLinkEmail']);
-    Route::post('password-reset', [PasswordResetController::class, 'passwordReset']);
+    
 });
