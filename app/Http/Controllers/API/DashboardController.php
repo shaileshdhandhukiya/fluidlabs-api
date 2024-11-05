@@ -29,10 +29,10 @@ class DashboardController extends BaseController
             $pendingProjects    = Project::whereIn('status', ['not started', 'in progress', 'on hold', 'cancelled'])->count();
 
             // Fetch the most recent 5 projects
-            $recentProjects = Project::orderBy('created_at', 'desc')->take(5)->get(['id', 'project_name', 'status', 'customer_id', 'created_at']);
+            $recentProjects = Project::orderBy('updated_at', 'desc')->take(5)->get(['id', 'project_name', 'status', 'customer_id', 'created_at']);
 
             // Fetch the most recent 5 Tasks
-            $recentTasks    = Task::orderBy('created_at', 'desc')->take(5)->get(['id', 'subject', 'status', 'created_at', 'project_id', 'assignees']);
+            $recentTasks    = Task::orderBy('updated_at', 'desc')->take(5)->get(['id', 'subject', 'status', 'created_at', 'project_id', 'assignees']);
 
 
             $teamMembers = User::all();
