@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Auth;
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 Route::post('login', [RegisterController::class, 'login'])->name('login');
 
-Route::get('auth/google', [RegisterController::class, 'redirectToGoogle']);
-Route::post('auth/google/callback', [RegisterController::class, 'handleGoogleCallback']);
+Route::get('auth/google', [API\AuthController::class, 'redirectToGoogle']);
+Route::post('auth/google/callback', [API\AuthController::class, 'handleGoogleCallback']);
 
 //password reset
 Route::post('password-forgot', [PasswordResetController::class, 'sendResetLinkEmail']);
@@ -89,7 +89,6 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::delete('users/{id}', [API\UserController::class, 'destroy']);   
     Route::get('users-create', [API\UserController::class, 'create']);   
      
-
     // roles routes
     Route::get('roles', [API\RoleController::class, 'index']);                      
     Route::post('roles', [API\RoleController::class, 'store']);                     

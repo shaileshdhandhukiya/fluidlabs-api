@@ -12,6 +12,9 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Mail\OtpMail;
 use Illuminate\Http\JsonResponse;
+use Laravel\Socialite\Facades\Socialite;
+use Firebase\JWT\JWT;
+use Firebase\JWT\JWK;
 
 class AuthController extends BaseController
 {
@@ -42,7 +45,7 @@ class AuthController extends BaseController
         $user->save();
 
         // Send OTP via email
-        Mail::to($user->email)->send(new OtpMail($user,$otpCode));
+        Mail::to($user->email)->send(new OtpMail($user, $otpCode));
 
         return response()->json([
             'success' => true,
@@ -86,5 +89,93 @@ class AuthController extends BaseController
             'success' => true,
             'message' => 'Email verified successfully.',
         ]);
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback(Request $request)
+    {
+        $request->validate([
+            'access_token' => 'required|string',
+        ]);
+
+        $accessToken = $request->input('access_token');
+
+        try {
+            // Step 1: Determine if the token is an ID token (JWT) or an OAuth access token
+            if (substr_count($accessToken, '.') === 2) {
+                // ID Token (JWT)
+                $googleUser = $this->verifyIdToken($accessToken);
+            } else {
+                // OAuth Access Token
+                $googleUser = Socialite::driver('google')->stateless()->userFromToken($accessToken);
+            }
+
+            // Step 2: Find or create the user in your database
+            $user = User::where('email', $googleUser->email)->first();
+
+            if ($user) {
+                if (is_null($user->email_verified_at)) {
+                    $user->email_verified_at = now();
+                    $user->save();
+                }
+                Auth::login($user);
+            } else {
+                $user = User::create([
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'password' => bcrypt(Str::random(16)),
+                    'email_verified_at' => now(),
+                ]);
+            }
+
+            // Step 3: Generate Passport Token
+            $tokenResult = $user->createToken("auth_token");
+            $token = $tokenResult->accessToken;
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'token' => $token,
+                    'token_type' => 'Bearer',
+                    'expires_at' => $tokenResult->token->expires_at,
+                    'user' => [
+                        'first_name' => $user->first_name,
+                        'last_name' => $user->last_name,
+                        'email' => $user->email,
+                        'user_id' => $user->id,
+                    ],
+                    'role' => $user->getRoleNames()->toArray(),
+                ],
+                'message' => 'User logged in successfully via Google.',
+                'status' => 200
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Google login failed',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
+
+    private function verifyIdToken($idToken)
+    {
+        $client = new \GuzzleHttp\Client();
+        $response = $client->get('https://www.googleapis.com/oauth2/v3/certs');
+        $keys = json_decode($response->getBody()->getContents(), true);
+
+        $publicKeys = JWK::parseKeySet($keys);
+        $decoded = JWT::decode($idToken, $publicKeys, ['RS256']);
+
+        return (object)[
+            'name' => $decoded->name,
+            'email' => $decoded->email,
+            'email_verified' => $decoded->email_verified,
+        ];
     }
 }
