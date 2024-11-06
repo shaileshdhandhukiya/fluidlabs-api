@@ -9,11 +9,12 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Arr;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\WelcomeEmail;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends BaseController
 {
@@ -64,9 +65,6 @@ class UserController extends BaseController
         ], 200); // HTTP 200 OK
     }
 
-    
-
-
     /**
      * Show the form for creating a new resource.
      *
@@ -104,6 +102,7 @@ class UserController extends BaseController
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:12',
+            'send_welcome_email' => 'boolean',//0 or 1
             'roles' => 'required'
         ]);
 
@@ -132,6 +131,11 @@ class UserController extends BaseController
 
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
+
+        // Send welcome email if checkbox is checked
+        if ($request->input('send_welcome_email', false)) {
+            Mail::to($user->email)->send(new WelcomeEmail($user, $input['original_password']));
+        }
 
         return response()->json([
             'success' => true,
