@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
@@ -15,9 +16,14 @@ use Illuminate\Http\JsonResponse;
 use Laravel\Socialite\Facades\Socialite;
 use Firebase\JWT\JWT;
 use Firebase\JWT\JWK;
+use GuzzleHttp\Client;
+use Firebase\JWT\Key;
 
 class AuthController extends BaseController
 {
+
+    const ALLOWED_ALGOS = ['RS256'];
+    
     /**
      * Send OTP for email verification.
      *
@@ -105,52 +111,31 @@ class AuthController extends BaseController
         $accessToken = $request->input('access_token');
 
         try {
-            // Step 1: Determine if the token is an ID token (JWT) or an OAuth access token
-            if (substr_count($accessToken, '.') === 2) {
-                // ID Token (JWT)
-                $googleUser = $this->verifyIdToken($accessToken);
-            } else {
-                // OAuth Access Token
-                $googleUser = Socialite::driver('google')->stateless()->userFromToken($accessToken);
-            }
+            // Step 1: Get Google User
+            $googleUser = $this->getGoogleUser($accessToken);
 
-            // Step 2: Find or create the user in your database
+            // Step 2: Find or create user in the database
             $user = User::where('email', $googleUser->email)->first();
 
-            if ($user) {
-                if (is_null($user->email_verified_at)) {
-                    $user->email_verified_at = now();
-                    $user->save();
-                }
-                Auth::login($user);
-            } else {
-                $user = User::create([
-                    'name' => $googleUser->name,
-                    'email' => $googleUser->email,
-                    'password' => bcrypt(Str::random(16)),
-                    'email_verified_at' => now(),
-                ]);
+            if (is_null($user->email_verified_at)) {
+                $user->email_verified_at = now();
+                $user->save();
             }
 
             // Step 3: Generate Passport Token
             $tokenResult = $user->createToken("auth_token");
-            $token = $tokenResult->accessToken;
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                    'expires_at' => $tokenResult->token->expires_at,
-                    'user' => [
-                        'first_name' => $user->first_name,
-                        'last_name' => $user->last_name,
-                        'email' => $user->email,
-                        'user_id' => $user->id,
-                    ],
+                    'token' => $tokenResult->accessToken,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'email' => $user->email,
+                    'user_id' => $user->id,
                     'role' => $user->getRoleNames()->toArray(),
                 ],
-                'message' => 'User logged in successfully via Google.',
+                'message' => 'User login successfully.',
                 'status' => 200
             ], 200);
         } catch (\Exception $e) {
@@ -163,19 +148,37 @@ class AuthController extends BaseController
         }
     }
 
+    private function getGoogleUser($accessToken)
+    {
+        if (substr_count($accessToken, '.') === 2) {
+            // ID Token (JWT)
+            return $this->verifyIdToken($accessToken);
+        } else {
+            // OAuth Access Token
+            return Socialite::driver('google')->stateless()->userFromToken($accessToken);
+        }
+    }
+
     private function verifyIdToken($idToken)
     {
-        $client = new \GuzzleHttp\Client();
-        $response = $client->get('https://www.googleapis.com/oauth2/v3/certs');
-        $keys = json_decode($response->getBody()->getContents(), true);
+        try {
+            $client = new Client();
+            $response = $client->get('https://www.googleapis.com/oauth2/v3/certs');
+            $keys = json_decode($response->getBody()->getContents(), true);
 
-        $publicKeys = JWK::parseKeySet($keys);
-        $decoded = JWT::decode($idToken, $publicKeys, ['RS256']);
+            $publicKeys = JWK::parseKeySet($keys);
 
-        return (object)[
-            'name' => $decoded->name,
-            'email' => $decoded->email,
-            'email_verified' => $decoded->email_verified,
-        ];
+            $decoded = JWT::decode($idToken, $publicKeys);
+
+            return (object) [
+                'name' => $decoded->name ?? null,
+                'email' => $decoded->email ?? null,
+                'email_verified' => $decoded->email_verified ?? false,
+            ];
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to verify ID token: ' . $e->getMessage());
+        }
     }
+    
+
 }
