@@ -102,7 +102,7 @@ class UserController extends BaseController
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:12',
-            'send_welcome_email' => 'boolean',//0 or 1
+            'send_welcome_email' => 'boolean', //0 or 1
             'roles' => 'required'
         ]);
 
@@ -201,9 +201,9 @@ class UserController extends BaseController
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|min:12',
-            'send_welcome_email' => 'boolean',//0 or 1
+            'send_welcome_email' => 'boolean', //0 or 1
             'roles' => 'nullable'
-            
+
         ]);
 
         if ($validator->fails()) {
@@ -248,6 +248,7 @@ class UserController extends BaseController
 
         // Hash password if provided
         if (!empty($input['password'])) {
+            $originalPassword = $input['password'];
             $input['original_password'] = $input['password'];
             $input['password'] = Hash::make($input['password']);
         } else {
@@ -266,9 +267,11 @@ class UserController extends BaseController
             $user->assignRole($request->input('roles'));
         }
 
+
         // Send welcome email if checkbox is checked
         if ($request->input('send_welcome_email', false)) {
-            Mail::to($user->email)->send(new WelcomeEmail($user, $input['original_password']));
+            $passwordToSend = isset($originalPassword) ? $originalPassword : '(Set by user)';
+            Mail::to($user->email)->send(new WelcomeEmail($user, $passwordToSend));
         }
 
         return response()->json([
