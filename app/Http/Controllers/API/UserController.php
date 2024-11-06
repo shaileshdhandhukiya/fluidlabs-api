@@ -201,7 +201,9 @@ class UserController extends BaseController
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|min:12',
+            'send_welcome_email' => 'boolean',//0 or 1
             'roles' => 'nullable'
+            
         ]);
 
         if ($validator->fails()) {
@@ -262,6 +264,11 @@ class UserController extends BaseController
         // Assign new roles
         if ($request->input('roles')) {
             $user->assignRole($request->input('roles'));
+        }
+
+        // Send welcome email if checkbox is checked
+        if ($request->input('send_welcome_email', false)) {
+            Mail::to($user->email)->send(new WelcomeEmail($user, $input['original_password']));
         }
 
         return response()->json([
