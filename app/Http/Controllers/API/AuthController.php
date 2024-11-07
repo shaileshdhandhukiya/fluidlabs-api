@@ -134,6 +134,7 @@ class AuthController extends BaseController
                     'email' => $user->email,
                     'user_id' => $user->id,
                     'role' => $user->getRoleNames()->toArray(),
+                    'permissions' => $user->getAllPermissions()->pluck('name'),
                 ],
                 'message' => 'User login successfully.',
                 'status' => 200
