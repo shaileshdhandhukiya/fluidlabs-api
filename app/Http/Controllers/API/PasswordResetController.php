@@ -30,11 +30,11 @@ class PasswordResetController extends BaseController
         return $status === Password::RESET_LINK_SENT
 
             ? response()->json([
-                'success' => true,             
+                'success' => true,
                 'message' => 'Reset link sent to your email.',
                 'status' => 200
             ], 200) : response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Error sending reset link.',
                 'status' => 500
             ], 500);
@@ -62,11 +62,16 @@ class PasswordResetController extends BaseController
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                // Send notification for password change
+                $user->notify(new \App\Notifications\PasswordChangedNotification());
             }
+
+
         );
 
         return $status === Password::PASSWORD_RESET
-            ? response()->json(['success' => true, 'message' => 'Password reset successful.','status' => 200],200)
-            : response()->json(['success' => false, 'message' => 'Invalid token or email.','status' => 500], 500);
+            ? response()->json(['success' => true, 'message' => 'Password reset successful.', 'status' => 200], 200)
+            : response()->json(['success' => false, 'message' => 'Invalid token or email.', 'status' => 500], 500);
     }
 }
