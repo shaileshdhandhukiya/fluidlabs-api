@@ -68,7 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendPasswordResetNotification($token)
     {
-        $resetUrl = env('APP_FRONTEND_URL', 'https://fluidlabs.netlify.app') . "/password-reset?token=$token&email=" . urlencode($this->email);
+        $resetUrl = env('APP_FRONTEND_URL', 'http://flcrm.fluidlabs.co.uk') . "/password-reset?token=$token&email=" . urlencode($this->email);
        
         $this->notify(new CustomResetPassword($resetUrl));
     }
