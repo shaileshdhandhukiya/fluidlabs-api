@@ -186,24 +186,20 @@ class UserController extends BaseController
      */
     public function update(Request $request, $id)
     {
-
-        // dd($request->all());
-        return response()->json($request->all());
-
+        // Validate the incoming request
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Limit file size to 2MB
             'type' => 'nullable|string',
             'phone' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
             'designation' => 'nullable|string',
             'date_of_join' => 'nullable|date',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|min:12',
-            'send_welcome_email' => 'boolean', //0 or 1
-            'roles' => 'nullable'
-
+            'password' => 'nullable|string|min:12',
+            'send_welcome_email' => 'boolean',
+            'roles' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -212,7 +208,7 @@ class UserController extends BaseController
                 'message' => 'Validation Error.',
                 'errors' => $validator->errors(),
                 'status' => 422,
-            ], 422); // HTTP 422 Unprocessable Entity
+            ], 422);
         }
 
         // Find the user by ID
@@ -227,50 +223,40 @@ class UserController extends BaseController
         }
 
         // Prepare input data
-        $input = $request->all();
+        $input = $request->except(['profile_photo', 'password']);
 
         // Handle file upload for profile photo
         if ($request->hasFile('profile_photo')) {
-            // Delete old profile photo if exists
+            // Delete old profile photo if it exists
             if ($user->profile_photo) {
                 Storage::disk('public')->delete($user->profile_photo);
             }
 
             // Store the new profile photo
-            $file = $request->file('profile_photo');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('uploads/profile_photos', $filename, 'public');
-            $input['profile_photo'] = 'profile_photos/' . $filename;
-        } else {
-            // If no new profile photo is provided, keep the existing one
-            $input['profile_photo'] = $user->profile_photo;
+            $originalName = $request->file('profile_photo')->getClientOriginalName();
+            $filePath = $request->file('profile_photo')->storeAs('uploads/profile_photos', $originalName, 'public');
+            $input['profile_photo'] = $filePath;
         }
 
         // Hash password if provided
-        if (!empty($input['password'])) {
-            $originalPassword = $input['password'];
-            $input['original_password'] = $input['password'];
-            $input['password'] = Hash::make($input['password']);
-        } else {
-            // Exclude password from input if not provided
-            $input = Arr::except($input, ['password']);
+        if (!empty($request->input('password'))) {
+            $originalPassword = $request->input('password');
+            $input['password'] = Hash::make($originalPassword);
+            $input['original_password'] = $originalPassword;
         }
 
-        // Update user with the input data
+        // Update the user data
         $user->update($input);
 
-        // Remove existing roles
+        // Remove existing roles and assign new roles
         DB::table('model_has_roles')->where('model_id', $id)->delete();
-
-        // Assign new roles
-        if ($request->input('roles')) {
+        if (!empty($request->input('roles'))) {
             $user->assignRole($request->input('roles'));
         }
 
-
         // Send welcome email if checkbox is checked
         if ($request->input('send_welcome_email', false)) {
-            $passwordToSend = isset($originalPassword) ? $originalPassword : '(Set by user)';
+            $passwordToSend = $originalPassword ?? '(Set by user)';
             Mail::to($user->email)->send(new WelcomeEmail($user, $passwordToSend));
         }
 
@@ -281,6 +267,7 @@ class UserController extends BaseController
             'status' => 200,
         ], 200);
     }
+
 
     /**
      * Remove the specified user from storage.
