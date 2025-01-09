@@ -85,7 +85,7 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('users', [API\UserController::class, 'index']);                      
     Route::post('users', [API\UserController::class, 'store']);                    
     Route::get('users/{id}', [API\UserController::class, 'show']);                  
-    Route::put('users/{id}', [API\UserController::class, 'update']);                
+    Route::post('users/{id}', [API\UserController::class, 'update']);                
     Route::delete('users/{id}', [API\UserController::class, 'destroy']);   
     Route::get('users-create', [API\UserController::class, 'create']);   
      

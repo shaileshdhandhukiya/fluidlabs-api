@@ -186,31 +186,6 @@ class UserController extends BaseController
      */
     public function update(Request $request, $id)
     {
-        // Validate the incoming request
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Limit file size to 2MB
-            'type' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'date_of_birth' => 'nullable|date',
-            'designation' => 'nullable|string',
-            'date_of_join' => 'nullable|date',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:12',
-            'send_welcome_email' => 'boolean',
-            'roles' => 'nullable|array',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation Error.',
-                'errors' => $validator->errors(),
-                'status' => 422,
-            ], 422);
-        }
-
         // Find the user by ID
         $user = User::find($id);
 
@@ -222,8 +197,34 @@ class UserController extends BaseController
             ], 404);
         }
 
-        // Prepare input data
+        // Validate the incoming request
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Limit file size to 2MB
+            'type' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'date_of_birth' => 'nullable|date',
+            'designation' => 'nullable|string',
+            'date_of_join' => 'nullable|date',
+            'password' => 'nullable|string|min:12',
+            'send_welcome_email' => 'boolean',
+            'roles' => 'nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error.',
+                'errors' => $validator->errors(),
+                'status' => 422,
+            ], 422);
+        }
+
+        // Prepare input data, excluding specific fields
         $input = $request->except(['profile_photo', 'password']);
+        
 
         // Handle file upload for profile photo
         if ($request->hasFile('profile_photo')) {
@@ -242,7 +243,7 @@ class UserController extends BaseController
         if (!empty($request->input('password'))) {
             $originalPassword = $request->input('password');
             $input['password'] = Hash::make($originalPassword);
-            $input['original_password'] = $originalPassword;
+            $input['original_password'] = $originalPassword; // Optional: Store plain password temporarily
         }
 
         // Update the user data
@@ -267,6 +268,7 @@ class UserController extends BaseController
             'status' => 200,
         ], 200);
     }
+
 
 
     /**
