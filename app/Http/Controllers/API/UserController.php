@@ -223,8 +223,7 @@ class UserController extends BaseController
         }
 
         // Prepare input data, excluding specific fields
-        $input = $request->except(['profile_photo', 'password']);
-        
+        $input = $request->except(['profile_photo', 'password']);        
 
         // Handle file upload for profile photo
         if ($request->hasFile('profile_photo')) {
@@ -251,6 +250,7 @@ class UserController extends BaseController
 
         // Remove existing roles and assign new roles
         DB::table('model_has_roles')->where('model_id', $id)->delete();
+
         if (!empty($request->input('roles'))) {
             $user->assignRole($request->input('roles'));
         }
