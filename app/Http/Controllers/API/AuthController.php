@@ -133,6 +133,7 @@ class AuthController extends BaseController
                     'last_name' => $user->last_name,
                     'email' => $user->email,
                     'user_id' => $user->id,
+                    'email_verified_at' => $user->email_verified_at,
                     'role' => $user->getRoleNames()->toArray(),
                     'permissions' => $user->getAllPermissions()->pluck('name'),
                 ],

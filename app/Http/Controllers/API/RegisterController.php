@@ -76,7 +76,7 @@ class RegisterController extends BaseController
             $success["last_name"] = $user->last_name;
             $success["email"] = $user->email;
             $success["user_id"] = $user->id;
-
+            $success["email_verified_at"] = $user->email_verified_at;
             $success["role"] = $user->getRoleNames()->toArray();
             $success["permissions"] = $user->getAllPermissions()->pluck('name');
 
