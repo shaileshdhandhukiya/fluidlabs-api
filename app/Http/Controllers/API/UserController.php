@@ -269,8 +269,6 @@ class UserController extends BaseController
         ], 200);
     }
 
-
-
     /**
      * Remove the specified user from storage.
      *
